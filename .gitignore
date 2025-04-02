@@ -2,5 +2,5 @@ Debug
 ipch
 *.sdf
 *.aps
-*.suo
+*.v12.suo
 *.opensdf
