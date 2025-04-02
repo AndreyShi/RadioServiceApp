@@ -53,6 +53,66 @@ CRadioServiceAppDlg::CRadioServiceAppDlg(CWnd* pParent /*=NULL*/)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
+/*
+0 dB - 3F
+5 dB - 35
+10 dB - 2B
+15 dB - 21
+20 dB- 17
+25 dB - 0D
+30 dB - 03
+*/
+cntrl_data CRadioServiceAppDlg::getting_data(){
+
+	cntrl_data dt = { 0 };
+
+	int cur_sel_atten;
+	BOOL lpTrans = FALSE;
+
+	dt.start_freq = GetDlgItemInt(IDC_START_FREQ, &lpTrans, FALSE);
+	printf("start_freq: %d ", dt.start_freq);
+
+	dt.end_freq = GetDlgItemInt(IDC_END_FREQ, &lpTrans, FALSE);
+	printf("end_freq: %d ", dt.end_freq);
+
+	cur_sel_atten = GetDlgItemInt(IDC_COMBO_ATTENU, &lpTrans, FALSE);
+	if (cur_sel_atten == 0)
+	{
+		dt.attenua = 0x3F;
+	}
+	else if (cur_sel_atten == 5)
+	{
+		dt.attenua = 0x35;
+	}
+	else if (cur_sel_atten == 10)
+	{
+		dt.attenua = 0x2B;
+	}
+	else if (cur_sel_atten == 15)
+	{
+		dt.attenua = 0x21;
+	}
+	else if (cur_sel_atten == 20)
+	{
+		dt.attenua = 0x17;
+	}
+	else if (cur_sel_atten == 25)
+	{
+		dt.attenua = 0x0D;
+	}
+	else if (cur_sel_atten == 30)
+	{
+		dt.attenua = 0x03;
+	}
+	else{
+		printf("unknown attenua selection, set to 0 dB ");
+		dt.attenua = 0x3F;
+	}
+
+	printf("attenua: 0x%02x\n", dt.attenua);
+
+	return dt;
+}
 
 void CRadioServiceAppDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -169,69 +229,37 @@ void CRadioServiceAppDlg::OnBnClickedCancel()
 }
 
 void CRadioServiceAppDlg::OnBnClickedInitialization(){
+
+	return;
 	SendInitUsbPacket();
 	RecvInitUsbPacket();
 	SendEmptyUsbPacket();
 	RecvInitUsbPacket();
 }
-/*
-0 dB - 3F
-5 dB - 35
-10 dB - 2B 
-15 dB - 21
-20 dB- 17
-25 dB - 0D
-30 dB - 03
-*/
+
 void CRadioServiceAppDlg::OnBnClickedPusk(){
 
+	//if (XferThread)
+	//{
+	//	bLooping = false;
+	//	GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("старт"));
+	//	return;
+	//}
 
-	if (XferThread)
-	{
-		bLooping = false;
-		GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("старт"));
-		return;
+	for (int i = 0; i < 8; i++){
+		SendInitUsbPacket();
+		RecvInitUsbPacket();
 	}
-	//printf("OnBnClickedPusk()\n");
-	UINT16 start_freq;
-	UINT16 end_freq;
-	UINT8 attenua;
+	SendEmptyUsbPacket();
+	abort_pipe();
+	//create async Readpipe 0x82 pending
+	//wait signal
+	cntrl_data dt = { 0 };
+	dt = getting_data();
+	SendSetupUsbPacket(dt.start_freq, dt.end_freq, dt.attenua);
+	//read data from 0x82
 
-	int cur_sel_atten;
-	BOOL lpTrans = FALSE;
-
-	start_freq = GetDlgItemInt(IDC_START_FREQ, &lpTrans, FALSE);
-	printf("start_freq: %d ", start_freq);
-
-	end_freq = GetDlgItemInt(IDC_END_FREQ, &lpTrans, FALSE);
-	printf("end_freq: %d ", end_freq);
-
-	cur_sel_atten = GetDlgItemInt(IDC_COMBO_ATTENU, &lpTrans, FALSE);
-	if (cur_sel_atten == 0)
-	    { attenua = 0x3F;}
-	else if (cur_sel_atten == 5)
-	    { attenua = 0x35;}
-	else if (cur_sel_atten == 10)
-	    { attenua = 0x2B;}
-	else if (cur_sel_atten == 15)
-	    { attenua = 0x21;}
-	else if (cur_sel_atten == 20)
-	    { attenua = 0x17;}
-	else if (cur_sel_atten == 25)
-	    { attenua = 0x0D;}
-	else if (cur_sel_atten == 30)
-	    { attenua = 0x03;}
-	else{
-		printf("unknown attenua selection, set to 0 dB ");
-		attenua = 0x3F;
-	}
-
-	printf("attenua: 0x%02x\n", attenua);
-	//_tprintf(_T("%s\n"), (LPCTSTR)cur_sel);
-	SendSetupUsbPacket(start_freq, end_freq, attenua);
-
-	bLooping = true;
-	XferThread = AfxBeginThread(XferLoop, this);
-
-	GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("стоп"));
+	//bLooping = true;
+	//XferThread = AfxBeginThread(XferLoop, this);
+	//GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("стоп"));
 }

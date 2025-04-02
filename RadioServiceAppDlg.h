@@ -4,6 +4,12 @@
 
 #pragma once
 
+typedef struct cntrl_data{
+	UINT16 start_freq;
+	UINT16 end_freq;
+	UINT8 attenua;
+};
+
 
 // CRadioServiceAppDlg dialog
 class CRadioServiceAppDlg : public CDialogEx
@@ -13,7 +19,7 @@ public:
 	CWinThread *XferThread;
 	bool bLooping;
 	CRadioServiceAppDlg(CWnd* pParent = NULL);	// standard constructor
-
+	cntrl_data getting_data();
 // Dialog Data
 	enum { IDD = IDD_RADIOSERVICEAPP_DIALOG };
 

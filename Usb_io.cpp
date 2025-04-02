@@ -198,7 +198,7 @@ int c;
 int InitUsb(void){
 	setlocale(LC_ALL, "en_US.UTF-8");
 	const char* p[] = { "Test WinUsb\n" };
-	const char* pj[] = { "Ïðèâåò!\n" };
+	const wchar_t* pj[] = { _T("ÐŸÑ€Ð¸Ð²ÐµÑ‚!\n") };
 
 	printf("%s", *p);
 	int gp = get_path(CYPRESS_BOARD);
@@ -263,7 +263,7 @@ int InitUsb(void){
 	}
 	//c = _getch();
 #endif
-#ifndef RW_TEST_READ_ASYNC
+#ifdef RW_TEST_READ_ASYNC
 	UCHAR buf_r[10] = { 0 };
 	ULONG recieved = 0;
 	DWORD res_wait;
@@ -317,7 +317,7 @@ void SendInitUsbPacket(void){
 	wxb.Index       = 0;      //uint16
 	wxb.Value       = 0x06;   //uint16
 	wxb.Length      = 13;     //uint16
-	UCHAR buf_s[13] = { 0x05, 0x0D, 0x09, 0x07, 0x05, 0x07, 0x22, 0x08, 0x40, 0x1F, 0x68, 0x00, 0xDE };
+	UCHAR buf_s[13] = { 0x05, 0x0D, 0x09, 0x07, 0x05, 0x07, 0x22, 0x08, 0x40, 0x1F, 0x6b, 0x00, 0xDE };
 	ULONG transferred_s = 0;
 
 	printf("sending packet:");
@@ -455,4 +455,8 @@ UINT XferLoop(LPVOID params) {
 	printf("end XferLoop\n");
 	dlg->XferThread = NULL;
 	return true;
+}
+
+void abort_pipe(void){
+	WinUsb_AbortPipe(InterfaceHandle, 0x82);
 }
