@@ -234,7 +234,7 @@ int InitUsb(void){
 	PIPE_ID pipeid;
 	QueryDeviceEndpoints(InterfaceHandle, &pipeid);
 	//c = _getch();
-#ifdef RW_TEST
+#ifdef RW_TEST_WRITE
 	UCHAR buf[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 	ULONG transferred = 0;
 	BOOL res = WinUsb_WritePipe(InterfaceHandle, 0x02, buf, 10, &transferred, NULL);
@@ -249,10 +249,10 @@ int InitUsb(void){
 
 	//c = _getch();
 #endif
-#ifdef RW_TEST
+#ifdef RW_TEST_READ_SYNC
 	UCHAR buf_r[10] = { 0 };
 	ULONG recieved = 0;
-	BOOL res_r = WinUsb_WritePipe(InterfaceHandle, 0x86, buf_r, 10, &recieved, NULL);
+	BOOL res_r = WinUsb_ReadPipe(InterfaceHandle, 0x86, buf_r, 10, &recieved, NULL);
 	if (res_r == TRUE)
 	{
 		printf("WinUsb_ReadPipe recieved: %d byt rev:%d %d %d %d %d %d\n", recieved, buf_r[0], buf_r[1], buf_r[2], buf_r[3], buf_r[4], buf_r[5]);
@@ -261,6 +261,29 @@ int InitUsb(void){
 	{
 		printf("WinUsb_ReadPipe GetLastError: %d\n", GetLastError());
 	}
+	//c = _getch();
+#endif
+#ifndef RW_TEST_READ_ASYNC
+	UCHAR buf_r[10] = { 0 };
+	ULONG recieved = 0;
+	DWORD res_wait;
+	OVERLAPPED over = { 0 };
+	over.hEvent = CreateEvent(NULL,FALSE,FALSE,_T("async read usb"));
+	BOOL res_r = WinUsb_ReadPipe(InterfaceHandle, 0x86, buf_r, 10, NULL, &over);
+	res_wait = WaitForSingleObject(over.hEvent, 1000);
+
+	if (res_wait == WAIT_OBJECT_0) //object was signaled
+	    { 
+		    printf("event occured res_wait: %d\n", res_wait);
+		    BOOL res_over = WinUsb_GetOverlappedResult(InterfaceHandle, &over, &recieved, FALSE);//get recieved cnt bytes
+			BOOL res_r = WinUsb_ReadPipe(InterfaceHandle, 0x86, buf_r, 10, NULL, &over);
+			if (res_r == TRUE)
+			    { printf("WinUsb_ReadPipe recieved: %d byt rev:%d %d %d %d %d %d\n", recieved, buf_r[0], buf_r[1], buf_r[2], buf_r[3], buf_r[4], buf_r[5]);}
+			else
+			    { printf("WinUsb_ReadPipe GetLastError: %d\n", GetLastError());}
+	    }
+	else
+		{ printf("TIMEOUT res_wait: %d\n", res_wait);}
 	//c = _getch();
 #endif
 #ifdef RW_TEST
