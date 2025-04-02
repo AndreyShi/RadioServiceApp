@@ -12,6 +12,7 @@
 #endif
 
 #include "ConsoleDebug.h"
+#include "RadioServiceAppDlg.h"
 
 // CAboutDlg dialog used for App About
 
@@ -126,6 +127,10 @@ BEGIN_MESSAGE_MAP(CRadioServiceAppDlg, CDialogEx)
 	ON_BN_CLICKED(IDCANCEL,  &CRadioServiceAppDlg::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_INIT, &CRadioServiceAppDlg::OnBnClickedInitialization)
 	ON_BN_CLICKED(IDC_PUSK,  &CRadioServiceAppDlg::OnBnClickedPusk)
+	ON_BN_CLICKED(IDOK, &CRadioServiceAppDlg::OnBnClickedOk)
+	ON_BN_CLICKED(IDC_BUTTON_WRITE_USB, &CRadioServiceAppDlg::OnBnClickedButtonWriteUsb)
+	ON_BN_CLICKED(IDC_BUTTON_READ_SYNC, &CRadioServiceAppDlg::OnBnClickedButtonReadSync)
+	ON_BN_CLICKED(IDC_BUTTON_READ_ASYNC, &CRadioServiceAppDlg::OnBnClickedButtonReadAsync)
 END_MESSAGE_MAP()
 
 
@@ -161,7 +166,9 @@ BOOL CRadioServiceAppDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
-
+	GetDlgItem(IDC_BUTTON_READ_ASYNC)->ShowWindow(FALSE);
+	GetDlgItem(IDC_BUTTON_READ_SYNC)->ShowWindow(FALSE);
+	GetDlgItem(IDC_BUTTON_WRITE_USB)->ShowWindow(FALSE);
 	CreateConsole();
 	InitUsb();
 	GetDlgItem(IDC_START_FREQ)->SetWindowTextW(_T("580"));
@@ -257,9 +264,36 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	cntrl_data dt = { 0 };
 	dt = getting_data();
 	SendSetupUsbPacket(dt.start_freq, dt.end_freq, dt.attenua);
-	//read data from 0x82
 
 	//bLooping = true;
 	//XferThread = AfxBeginThread(XferLoop, this);
 	//GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("стоп"));
+}
+
+
+void CRadioServiceAppDlg::OnBnClickedOk()
+{
+	// TODO: Add your control notification handler code here
+	CDialogEx::OnOK();
+}
+
+
+void CRadioServiceAppDlg::OnBnClickedButtonWriteUsb()
+{
+	// TODO: Add your control notification handler code here
+	write_usb();
+}
+
+
+void CRadioServiceAppDlg::OnBnClickedButtonReadSync()
+{
+	// TODO: Add your control notification handler code here
+	read_sync();
+}
+
+
+void CRadioServiceAppDlg::OnBnClickedButtonReadAsync()
+{
+	// TODO: Add your control notification handler code here
+	read_async();
 }

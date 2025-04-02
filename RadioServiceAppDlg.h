@@ -40,4 +40,8 @@ public:
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnBnClickedInitialization();
 	afx_msg void OnBnClickedPusk();
+	afx_msg void OnBnClickedOk();
+	afx_msg void OnBnClickedButtonWriteUsb();
+	afx_msg void OnBnClickedButtonReadSync();
+	afx_msg void OnBnClickedButtonReadAsync();
 };

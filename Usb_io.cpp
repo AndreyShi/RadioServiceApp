@@ -1,5 +1,5 @@
 #include "stdafx.h"
-//#include <winerror.h>
+#include <winerror.h>
 //ERROR_IO_PENDING
 GUID Guid;
 wchar_t DevicePath[MAX_PATH];
@@ -275,15 +275,16 @@ int InitUsb(void){
 	if (res_wait == WAIT_OBJECT_0) //object was signaled
 	    { 
 		    printf("event occured res_wait: %d\n", res_wait);
-		    BOOL res_over = WinUsb_GetOverlappedResult(InterfaceHandle, &over, &recieved, FALSE);//get recieved cnt bytes
-			BOOL res_r = WinUsb_ReadPipe(InterfaceHandle, 0x86, buf_r, 10, NULL, &over);
-			if (res_r == TRUE)
-			    { printf("WinUsb_ReadPipe recieved: %d byt rev:%d %d %d %d %d %d\n", recieved, buf_r[0], buf_r[1], buf_r[2], buf_r[3], buf_r[4], buf_r[5]);}
+			BOOL res_over = WinUsb_GetOverlappedResult(InterfaceHandle, &over, &recieved, TRUE);//get recieved cnt bytes
+			if (res_over == 0)
+			    { printf("WinUsb_GetOverlappedResult GetLastError: %d  recieved %d\n", GetLastError(), recieved);}
 			else
-			    { printf("WinUsb_ReadPipe GetLastError: %d\n", GetLastError());}
+			    { printf("WinUsb_GetOverlappedResult recieved: %d byt rev:%d %d %d %d %d %d\n", recieved, buf_r[0], buf_r[1], buf_r[2], buf_r[3], buf_r[4], buf_r[5]);}
 	    }
 	else
-		{ printf("TIMEOUT res_wait: %d\n", res_wait);}
+	    { printf("WaitForSingleObject TIMEOUT res_wait: %d  GetLastError(): %d \n", res_wait,GetLastError());}
+
+	CloseHandle(over.hEvent);
 	//c = _getch();
 #endif
 #ifdef RW_TEST
@@ -459,4 +460,62 @@ UINT XferLoop(LPVOID params) {
 
 void abort_pipe(void){
 	WinUsb_AbortPipe(InterfaceHandle, 0x82);
+}
+
+void write_usb(void){
+	UCHAR buf[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	ULONG transferred = 0;
+	BOOL res = WinUsb_WritePipe(InterfaceHandle, 0x02, buf, 10, &transferred, NULL);
+	if (res == TRUE)
+	{
+		printf("WinUsb_WritePipe transferred: %d\n", transferred);
+	}
+	else
+	{
+		printf("WinUsb_WritePipe GetLastError: %d\n", GetLastError());
+	}
+}
+void read_sync(void){
+	UCHAR buf_r[10] = { 0 };
+	ULONG recieved = 0;
+	BOOL res_r = WinUsb_ReadPipe(InterfaceHandle, 0x86, buf_r, 10, &recieved, NULL);
+	if (res_r == TRUE)
+	{
+		printf("WinUsb_ReadPipe recieved: %d byt rev:%d %d %d %d %d %d\n", recieved, buf_r[0], buf_r[1], buf_r[2], buf_r[3], buf_r[4], buf_r[5]);
+	}
+	else
+	{
+		printf("WinUsb_ReadPipe GetLastError: %d\n", GetLastError());
+	}
+}
+void read_async(void){
+	UCHAR buf_r[10] = { 0 };
+	ULONG recieved = 0;
+	DWORD res_wait;
+	OVERLAPPED over = { 0 };
+	over.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if (over.hEvent == NULL)
+	    { printf("CreateEvent GetLastError(): %d\n", GetLastError());}
+	else
+	    {
+			BOOL res_r = WinUsb_ReadPipe(InterfaceHandle, 0x86, buf_r, 10, NULL, &over);
+			//printf("WinUsb_ReadPipe res_r: %d GetLastError(): %d\n", res_r, GetLastError());
+			res_wait = WaitForSingleObject(over.hEvent, 1000);
+
+			if (res_wait == WAIT_OBJECT_0) //object was signaled
+			{
+				printf("event occured res_wait: %d\n", res_wait);
+				BOOL res_over = WinUsb_GetOverlappedResult(InterfaceHandle, &over, &recieved, TRUE);//get recieved cnt bytes
+				if (res_over == 0)
+					{ printf("WinUsb_GetOverlappedResult GetLastError: %d  recieved %d\n", GetLastError(), recieved);}
+				else
+					{ printf("WinUsb_GetOverlappedResult recieved: %d byt rev:%d %d %d %d %d %d\n", recieved, buf_r[0], buf_r[1], buf_r[2], buf_r[3], buf_r[4], buf_r[5]);}
+			}
+			else
+				{
+					//if we catch TIMEOUT usb is bagged until unplug/plug device(testin in VirtualBox WinXp Usb Cypress Board)
+					printf("WaitForSingleObject TIMEOUT res_wait: %d  GetLastError(): %d \n", res_wait, GetLastError());
+				}
+			CloseHandle(over.hEvent);
+	   }
 }
