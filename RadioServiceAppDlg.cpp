@@ -242,13 +242,7 @@ void CRadioServiceAppDlg::OnBnClickedInitialization(){
 
 void CRadioServiceAppDlg::OnBnClickedPusk(){
 
-	//if (XferThread)
-	//{
-	//	bLooping = false;
-	//	GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("старт"));
-	//	return;
-	//}
-
+#ifndef TESTING
 	for (int i = 0; i < 8; i++){
 		SendInitUsbPacket();
 		RecvInitUsbPacket();
@@ -256,14 +250,24 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	SendEmptyUsbPacket();
 	abort_pipe();
 
-	device_data dt = { 0 };
-	dt = getting_data();
-	read_async_1024(SendSetupUsbPacket, dt);
-	//SendSetupUsbPacket(dt.start_freq, dt.end_freq, dt.attenua);
+	read_async_1024(SendSetupUsbPacket, getting_data());
+#endif
 
-	//bLooping = true;
-	//XferThread = AfxBeginThread(XferLoop, this);
-	//GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("стоп"));
+#ifdef THREAD_TEST
+	if (XferThread)
+	{
+		bLooping = false;
+		GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("старт"));
+		return;
+	}
+	SendInitUsbPacket();
+	device_data dt = getting_data();
+	SendSetupUsbPacket(dt.start_freq, dt.end_freq, dt.attenua);
+
+	bLooping = true;
+	XferThread = AfxBeginThread(XferLoop, this);
+	GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("стоп"));
+#endif
 }
 
 
