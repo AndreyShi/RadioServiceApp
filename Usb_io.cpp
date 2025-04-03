@@ -390,7 +390,7 @@ void SendSetupUsbPacket(UINT16 start_freq, UINT16 end_freq, UINT8 attenua){
 
 	WINUSB_SETUP_PACKET wxb = { 0 };
 	wxb.RequestType = 0x40;   //byte
-	wxb.Request     = 0xae;   //byte
+	wxb.Request     = 0xab;   //byte
 	wxb.Index       = 0x06;   //uint16
 	wxb.Value       = 0;      //uint16
 	wxb.Length      = 10;     //uint16
@@ -518,4 +518,43 @@ void read_async(void){
 				}
 			CloseHandle(over.hEvent);
 	   }
+}
+
+void read_async_1024(void(*ptfunc)(UINT16, UINT16, UINT8), device_data dt) {
+	UCHAR buf_r[1024] = { 0 };
+	ULONG recieved = 0;
+	DWORD res_wait;
+	OVERLAPPED over = { 0 };
+	over.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if (over.hEvent == NULL)
+	{
+		printf("CreateEvent GetLastError(): %d\n", GetLastError());
+	}
+	else
+	{
+		BOOL res_r = WinUsb_ReadPipe(InterfaceHandle, 0x82, buf_r, 1024, NULL, &over);
+		ptfunc(dt.start_freq, dt.end_freq, dt.attenua); //next test2 call from here 
+		res_wait = WaitForSingleObject(over.hEvent, 1000);
+
+		if (res_wait == WAIT_OBJECT_0) //object was signaled
+		{
+			//ptfunc(dt.start_freq, dt.end_freq, dt.attenua);//testing  - fail
+			printf("event occured res_wait: %d\n", res_wait);
+			BOOL res_over = WinUsb_GetOverlappedResult(InterfaceHandle, &over, &recieved, TRUE);//get recieved cnt bytes
+			if (res_over == 0)
+			{
+				printf("WinUsb_GetOverlappedResult GetLastError: %d  recieved %d\n", GetLastError(), recieved);
+			}
+			else
+			{
+				printf("WinUsb_GetOverlappedResult recieved: %d byt rev:%d %d %d %d %d %d\n", recieved, buf_r[0], buf_r[1], buf_r[2], buf_r[3], buf_r[4], buf_r[5]);
+			}
+		}
+		else
+		{
+			//if we catch TIMEOUT usb is bagged until unplug/plug device(testin in VirtualBox WinXp Usb Cypress Board)
+			printf("WaitForSingleObject TIMEOUT res_wait: %d  GetLastError(): %d \n", res_wait, GetLastError());
+		}
+		CloseHandle(over.hEvent);
+	}
 }

@@ -63,9 +63,9 @@ CRadioServiceAppDlg::CRadioServiceAppDlg(CWnd* pParent /*=NULL*/)
 25 dB - 0D
 30 dB - 03
 */
-cntrl_data CRadioServiceAppDlg::getting_data(){
+device_data CRadioServiceAppDlg::getting_data(){
 
-	cntrl_data dt = { 0 };
+	device_data dt = { 0 };
 
 	int cur_sel_atten;
 	BOOL lpTrans = FALSE;
@@ -169,6 +169,7 @@ BOOL CRadioServiceAppDlg::OnInitDialog()
 	GetDlgItem(IDC_BUTTON_READ_ASYNC)->ShowWindow(FALSE);
 	GetDlgItem(IDC_BUTTON_READ_SYNC)->ShowWindow(FALSE);
 	GetDlgItem(IDC_BUTTON_WRITE_USB)->ShowWindow(FALSE);
+	GetDlgItem(IDC_INIT)->ShowWindow(FALSE);
 	CreateConsole();
 	InitUsb();
 	GetDlgItem(IDC_START_FREQ)->SetWindowTextW(_T("580"));
@@ -236,12 +237,7 @@ void CRadioServiceAppDlg::OnBnClickedCancel()
 }
 
 void CRadioServiceAppDlg::OnBnClickedInitialization(){
-
-	return;
 	SendInitUsbPacket();
-	RecvInitUsbPacket();
-	SendEmptyUsbPacket();
-	RecvInitUsbPacket();
 }
 
 void CRadioServiceAppDlg::OnBnClickedPusk(){
@@ -259,11 +255,11 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	}
 	SendEmptyUsbPacket();
 	abort_pipe();
-	//create async Readpipe 0x82 pending
-	//wait signal
-	cntrl_data dt = { 0 };
+
+	device_data dt = { 0 };
 	dt = getting_data();
-	SendSetupUsbPacket(dt.start_freq, dt.end_freq, dt.attenua);
+	read_async_1024(SendSetupUsbPacket, dt);
+	//SendSetupUsbPacket(dt.start_freq, dt.end_freq, dt.attenua);
 
 	//bLooping = true;
 	//XferThread = AfxBeginThread(XferLoop, this);
