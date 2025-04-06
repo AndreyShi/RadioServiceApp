@@ -310,7 +310,7 @@ int InitUsb(void){
 	return 0;
 }
 
-void SendInitUsbPacket(void){
+void SetupUsbOUT_init(void){
 
 	WINUSB_SETUP_PACKET wxb = { 0 };
 	wxb.RequestType = 0x40;   //byte
@@ -321,7 +321,7 @@ void SendInitUsbPacket(void){
 	UCHAR buf_s[13] = { 0x05, 0x0D, 0x09, 0x07, 0x05, 0x07, 0x22, 0x08, 0x40, 0x1F, 0x6b, 0x00, 0xDE };
 	ULONG transferred_s = 0;
 
-	printf("sending packet:");
+	printf("sending packet OUT init, ReqT:0x%02x Req:0x%02x Index:%d Value:%d Length:%d\n", wxb.RequestType, wxb.Request, wxb.Index, wxb.Value, wxb.Length);
 	for (int i = 0; i < 13; i++)
 	    { printf(" 0x%02x", buf_s[i]);}
 	printf("\n");
@@ -337,23 +337,23 @@ void SendInitUsbPacket(void){
 	}
 }
 
-void RecvInitUsbPacket(void){
+void SetupUsbIN(UINT8 ReqT, UINT8 Req, UINT16 Index, UINT16 Value, UINT16 Length) {
 
 	WINUSB_SETUP_PACKET wxb = { 0 };
-	wxb.RequestType = 0xc0;   //byte
-	wxb.Request     = 0xae;   //byte
-	wxb.Index       = 0;      //uint16
-	wxb.Value       = 0;      //uint16
-	wxb.Length      = 64;     //uint16
+	wxb.RequestType = ReqT;       //byte
+	wxb.Request     = Req;        //byte
+	wxb.Index       = Index;      //uint16
+	wxb.Value       = Value;      //uint16
+	wxb.Length      = Length;     //uint16
 	UCHAR buf_s[64] = { 0 };
 	ULONG rcv = 0;
 
-	printf("WinUsb_ControlTransfer sending IN\n");
-	BOOL res_s = WinUsb_ControlTransfer(InterfaceHandle, wxb, buf_s, 64, &rcv, NULL);
+	printf("sending packet IN, ReqT:0x%02x Req:0x%02x Index:%d Value:%d Length:%d\n", wxb.RequestType, wxb.Request, wxb.Index, wxb.Value, wxb.Length);
+	BOOL res_s = WinUsb_ControlTransfer(InterfaceHandle, wxb, buf_s, Length, &rcv, NULL);
 	if (res_s == TRUE)
 	{
 		printf("WinUsb_ControlTransfer recieved: %d byt:", rcv);
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < rcv; i++)
 		     { printf(" 0x%02x", buf_s[i]);}
 		printf("...\n");
 	}
@@ -363,7 +363,7 @@ void RecvInitUsbPacket(void){
 	}
 }
 
-void SendEmptyUsbPacket(void){
+void SetupUsbOUT_empty(void){
 	WINUSB_SETUP_PACKET wxb = { 0 };
 	wxb.RequestType = 0x40;   //byte
 	wxb.Request =     0xaa;   //byte
@@ -373,7 +373,7 @@ void SendEmptyUsbPacket(void){
 	UCHAR buf_s = 0;
 	ULONG transferred_s = 0;
 
-	printf("sending empty packet\n");
+	printf("sending packet OUT empty, ReqT:0x%02x Req:0x%02x Index:%d Value:%d Length:%d\n", wxb.RequestType, wxb.Request, wxb.Index, wxb.Value, wxb.Length);
 
 	BOOL res_s = WinUsb_ControlTransfer(InterfaceHandle, wxb, &buf_s, 0, &transferred_s, NULL);
 	if (res_s == TRUE)
@@ -386,7 +386,7 @@ void SendEmptyUsbPacket(void){
 	}
 }
 
-void SendSetupUsbPacket(UINT16 start_freq, UINT16 end_freq, UINT8 attenua){
+void SetupUsbOUT_settings(device_data dt){
 
 	WINUSB_SETUP_PACKET wxb = { 0 };
 	wxb.RequestType = 0x40;   //byte
@@ -395,16 +395,16 @@ void SendSetupUsbPacket(UINT16 start_freq, UINT16 end_freq, UINT8 attenua){
 	wxb.Value       = 0;      //uint16
 	wxb.Length      = 10;     //uint16
 
-	UINT8 lbst = start_freq;
-	UINT8 hbst = start_freq >> 8;
+	UINT8 lbst = dt.start_freq;
+	UINT8 hbst = dt.start_freq >> 8;
 
-	UINT8 lben = end_freq;
-	UINT8 hben = end_freq >> 8;
+	UINT8 lben = dt.end_freq;
+	UINT8 hben = dt.end_freq >> 8;
 
-	UCHAR buf_s[10] = { 0x00, 0x01, lbst, hbst, lben, hben, 0x01, attenua, 0x3F, 0x3F };
+	UCHAR buf_s[10] = { 0x00, 0x01, lbst, hbst, lben, hben, 0x01, dt.attenua, 0x3F, 0x3F };
 	ULONG transferred_s = 0;
 
-	printf("sending packet:");
+	printf("sending packet OUT settings, ReqT:0x%02x Req:0x%02x Index:%d Value:%d Length:%d\n", wxb.RequestType, wxb.Request, wxb.Index, wxb.Value, wxb.Length);
 	for (int i = 0; i < 10; i++)
 	    { printf(" 0x%02x", buf_s[i]);}
 	printf("\n");
@@ -436,7 +436,7 @@ UINT XferLoop(LPVOID params) {
 
 	CRadioServiceAppDlg *dlg = (CRadioServiceAppDlg *)params;
 	printf("start XferLoop\n");
-	for (; dlg->bLooping;) {
+	for (int i = 0; dlg->bLooping && i < dlg->loops; i++) {
 		UCHAR buf_r[1024] = { 0 };
 		ULONG recieved = 0;
 		BOOL res_r = WinUsb_ReadPipe(InterfaceHandle, 0x82, buf_r, 1024, &recieved, NULL);
@@ -458,8 +458,12 @@ UINT XferLoop(LPVOID params) {
 	return true;
 }
 
-void abort_pipe(void){
-	WinUsb_AbortPipe(InterfaceHandle, 0x82);
+void abort_pipe(UINT8 pipeId){
+	WinUsb_AbortPipe(InterfaceHandle, pipeId);
+}
+
+void reset_pipe(UINT8 pipeId){
+	WinUsb_ResetPipe(InterfaceHandle, pipeId);
 }
 
 void write_usb(void){
@@ -499,7 +503,6 @@ void read_async(void){
 	else
 	    {
 			BOOL res_r = WinUsb_ReadPipe(InterfaceHandle, 0x86, buf_r, 10, NULL, &over);
-			//printf("WinUsb_ReadPipe res_r: %d GetLastError(): %d\n", res_r, GetLastError());
 			res_wait = WaitForSingleObject(over.hEvent, 1000);
 
 			if (res_wait == WAIT_OBJECT_0) //object was signaled
@@ -515,12 +518,14 @@ void read_async(void){
 				{
 					//if we catch TIMEOUT usb is bagged until unplug/plug device(testin in VirtualBox WinXp Usb Cypress Board)
 					printf("WaitForSingleObject TIMEOUT res_wait: %d  GetLastError(): %d \n", res_wait, GetLastError());
+					WinUsb_AbortPipe(InterfaceHandle, 0x86);
 				}
 			CloseHandle(over.hEvent);
 	   }
 }
 
-void read_async_1024(void(*ptfunc)(UINT16, UINT16, UINT8), device_data dt) {
+void read_async_1024(void) {
+
 	UCHAR buf_r[1024] = { 0 };
 	ULONG recieved = 0;
 	DWORD res_wait;
@@ -533,12 +538,10 @@ void read_async_1024(void(*ptfunc)(UINT16, UINT16, UINT8), device_data dt) {
 	else
 	{
 		BOOL res_r = WinUsb_ReadPipe(InterfaceHandle, 0x82, buf_r, 1024, NULL, &over);
-		ptfunc(dt.start_freq, dt.end_freq, dt.attenua); //next test2 call from here 
 		res_wait = WaitForSingleObject(over.hEvent, 1000);
 
 		if (res_wait == WAIT_OBJECT_0) //object was signaled
 		{
-			//ptfunc(dt.start_freq, dt.end_freq, dt.attenua);//testing  - fail
 			printf("event occured res_wait: %d\n", res_wait);
 			BOOL res_over = WinUsb_GetOverlappedResult(InterfaceHandle, &over, &recieved, TRUE);//get recieved cnt bytes
 			if (res_over == 0)
@@ -554,6 +557,7 @@ void read_async_1024(void(*ptfunc)(UINT16, UINT16, UINT8), device_data dt) {
 		{
 			//if we catch TIMEOUT usb is bagged until unplug/plug device(testin in VirtualBox WinXp Usb Cypress Board)
 			printf("WaitForSingleObject TIMEOUT res_wait: %d  GetLastError(): %d \n", res_wait, GetLastError());
+			WinUsb_AbortPipe(InterfaceHandle, 0x82);
 		}
 		CloseHandle(over.hEvent);
 	}

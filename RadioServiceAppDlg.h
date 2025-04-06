@@ -12,6 +12,7 @@ class CRadioServiceAppDlg : public CDialogEx
 public:
 	CWinThread *XferThread;
 	bool bLooping;
+	int loops;
 	CRadioServiceAppDlg(CWnd* pParent = NULL);	// standard constructor
 	device_data getting_data();
 // Dialog Data
@@ -38,4 +39,5 @@ public:
 	afx_msg void OnBnClickedButtonWriteUsb();
 	afx_msg void OnBnClickedButtonReadSync();
 	afx_msg void OnBnClickedButtonReadAsync();
+	afx_msg void OnBnClickedButtonAbort();
 };

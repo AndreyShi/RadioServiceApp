@@ -131,6 +131,7 @@ BEGIN_MESSAGE_MAP(CRadioServiceAppDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_WRITE_USB, &CRadioServiceAppDlg::OnBnClickedButtonWriteUsb)
 	ON_BN_CLICKED(IDC_BUTTON_READ_SYNC, &CRadioServiceAppDlg::OnBnClickedButtonReadSync)
 	ON_BN_CLICKED(IDC_BUTTON_READ_ASYNC, &CRadioServiceAppDlg::OnBnClickedButtonReadAsync)
+	ON_BN_CLICKED(IDC_BUTTON_Abort, &CRadioServiceAppDlg::OnBnClickedButtonAbort)
 END_MESSAGE_MAP()
 
 
@@ -169,6 +170,7 @@ BOOL CRadioServiceAppDlg::OnInitDialog()
 	GetDlgItem(IDC_BUTTON_READ_ASYNC)->ShowWindow(FALSE);
 	GetDlgItem(IDC_BUTTON_READ_SYNC)->ShowWindow(FALSE);
 	GetDlgItem(IDC_BUTTON_WRITE_USB)->ShowWindow(FALSE);
+	GetDlgItem(IDC_BUTTON_Abort)->ShowWindow(FALSE);
 	GetDlgItem(IDC_INIT)->ShowWindow(FALSE);
 	CreateConsole();
 	InitUsb();
@@ -237,20 +239,29 @@ void CRadioServiceAppDlg::OnBnClickedCancel()
 }
 
 void CRadioServiceAppDlg::OnBnClickedInitialization(){
-	SendInitUsbPacket();
+	SetupUsbOUT_init();
 }
 
 void CRadioServiceAppDlg::OnBnClickedPusk(){
 
 #ifndef TESTING
+	reset_pipe(0x82);
+	SetupUsbIN(0xc0, 0xab, 0, 0, 64);
 	for (int i = 0; i < 8; i++){
-		SendInitUsbPacket();
-		RecvInitUsbPacket();
+		SetupUsbOUT_init();
+		SetupUsbIN(0xc0, 0xae, 0, 0, 64);
 	}
-	SendEmptyUsbPacket();
-	abort_pipe();
+	SetupUsbOUT_empty();
+	Sleep(300);
+	abort_pipe(0x82);
 
-	read_async_1024(SendSetupUsbPacket, getting_data());
+	device_data dt = getting_data();
+
+	SetupUsbOUT_settings(dt);
+	loops = ceilf((float)(dt.end_freq - dt.start_freq) / 20);
+	for (int i = 0; i < loops; i++){
+		read_async_1024();
+	}
 #endif
 
 #ifdef THREAD_TEST
@@ -260,11 +271,11 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 		GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("старт"));
 		return;
 	}
-	SendInitUsbPacket();
-	device_data dt = getting_data();
-	SendSetupUsbPacket(dt.start_freq, dt.end_freq, dt.attenua);
+	SetupUsbOUT_init();
+	SetupUsbOUT_settings(getting_data());
 
 	bLooping = true;
+	loops = ceilf((float)(dt.end_freq - dt.start_freq) / 20);
 	XferThread = AfxBeginThread(XferLoop, this);
 	GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("стоп"));
 #endif
@@ -296,4 +307,11 @@ void CRadioServiceAppDlg::OnBnClickedButtonReadAsync()
 {
 	// TODO: Add your control notification handler code here
 	read_async();
+}
+
+
+void CRadioServiceAppDlg::OnBnClickedButtonAbort()
+{
+	// TODO: Add your control notification handler code here
+	abort_pipe(0x82);
 }
