@@ -10,7 +10,7 @@ struct device_data{
 
 int InitUsb(void);
 void SetupUsbOUT_init(void);
-void SetupUsbIN(UINT8 ReqT, UINT8 Req, UINT16 Index, UINT16 Value, UINT16 Length);
+void SetupUsbIN(UINT8 ReqT, UINT8 Req, UINT16 Value, UINT16 Index, UINT16 Length);
 void SetupUsbOUT_empty(void);
 void SetupUsbOUT_settings(device_data dt);
 UINT XferLoop(LPVOID params);

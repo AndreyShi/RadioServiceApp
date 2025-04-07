@@ -315,8 +315,8 @@ void SetupUsbOUT_init(void){
 	WINUSB_SETUP_PACKET wxb = { 0 };
 	wxb.RequestType = 0x40;   //byte
 	wxb.Request     = 0xae;   //byte
-	wxb.Index       = 0;      //uint16
-	wxb.Value       = 0x06;   //uint16
+	wxb.Value       = 0;      //uint16
+	wxb.Index       = 0x06;   //uint16
 	wxb.Length      = 13;     //uint16
 	UCHAR buf_s[13] = { 0x05, 0x0D, 0x09, 0x07, 0x05, 0x07, 0x22, 0x08, 0x40, 0x1F, 0x6b, 0x00, 0xDE };
 	ULONG transferred_s = 0;
@@ -337,13 +337,13 @@ void SetupUsbOUT_init(void){
 	}
 }
 
-void SetupUsbIN(UINT8 ReqT, UINT8 Req, UINT16 Index, UINT16 Value, UINT16 Length) {
+void SetupUsbIN(UINT8 ReqT, UINT8 Req, UINT16 Value, UINT16 Index, UINT16 Length) {
 
 	WINUSB_SETUP_PACKET wxb = { 0 };
 	wxb.RequestType = ReqT;       //byte
 	wxb.Request     = Req;        //byte
-	wxb.Index       = Index;      //uint16
 	wxb.Value       = Value;      //uint16
+	wxb.Index       = Index;      //uint16
 	wxb.Length      = Length;     //uint16
 	UCHAR buf_s[64] = { 0 };
 	ULONG rcv = 0;
@@ -391,8 +391,8 @@ void SetupUsbOUT_settings(device_data dt){
 	WINUSB_SETUP_PACKET wxb = { 0 };
 	wxb.RequestType = 0x40;   //byte
 	wxb.Request     = 0xab;   //byte
-	wxb.Index       = 0x06;   //uint16
-	wxb.Value       = 0;      //uint16
+	wxb.Value       = 0x06;   //uint16
+	wxb.Index       = 0;      //uint16
 	wxb.Length      = 10;     //uint16
 
 	UINT8 lbst = dt.start_freq;
