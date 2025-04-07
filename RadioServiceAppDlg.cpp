@@ -260,7 +260,8 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	SetupUsbOUT_settings(dt);
 	loops = ceilf((float)(dt.end_freq - dt.start_freq) / 20);
 	for (int i = 0; i < loops; i++){
-		read_async_1024();
+		UINT8 buf[1024] = { 0 };
+		read_usb_async(0x82, buf, 1024);
 	}
 #endif
 
@@ -268,7 +269,7 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	if (XferThread)
 	{
 		bLooping = false;
-		GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("старт"));
+		GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("пїЅпїЅпїЅпїЅпїЅ"));
 		return;
 	}
 	SetupUsbOUT_init();
@@ -278,7 +279,7 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	bLooping = true;
 	loops = ceilf((float)(dt.end_freq - dt.start_freq) / 20);
 	XferThread = AfxBeginThread(XferLoop, this);
-	GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("стоп"));
+	GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("пїЅпїЅпїЅпїЅ"));
 #endif
 }
 
@@ -293,21 +294,24 @@ void CRadioServiceAppDlg::OnBnClickedOk()
 void CRadioServiceAppDlg::OnBnClickedButtonWriteUsb()
 {
 	// TODO: Add your control notification handler code here
-	write_usb();
+	UCHAR buf[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	write_usb(0x02, buf, 10);
 }
 
 
 void CRadioServiceAppDlg::OnBnClickedButtonReadSync()
 {
 	// TODO: Add your control notification handler code here
-	read_sync();
+	UINT8 buf[10] = { 0 };
+	read_usb_sync(0x86, buf, 10);
 }
 
 
 void CRadioServiceAppDlg::OnBnClickedButtonReadAsync()
 {
 	// TODO: Add your control notification handler code here
-	read_async();
+	UINT8 buf[10] = { 0 };
+	read_usb_async(0x86, buf, 10);
 }
 
 

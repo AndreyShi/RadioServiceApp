@@ -17,8 +17,6 @@ UINT XferLoop(LPVOID params);
 void abort_pipe(UINT8 pipeId);
 void reset_pipe(UINT8 pipeId);
 
-void write_usb(void);
-void read_sync(void);
-void read_async(void);
-
-void read_async_1024(void);
+void write_usb(UINT8 pipeId, UINT8* buf, int max_cnt);
+void read_usb_sync(UINT8 pipeId, UINT8* buf, int max_cnt);
+void read_usb_async(UINT8 pipeId, UINT8* buf, int max_cnt);
