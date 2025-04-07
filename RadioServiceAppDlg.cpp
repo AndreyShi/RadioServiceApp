@@ -272,7 +272,8 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 		return;
 	}
 	SetupUsbOUT_init();
-	SetupUsbOUT_settings(getting_data());
+	device_data dt = getting_data();
+	SetupUsbOUT_settings(dt);
 
 	bLooping = true;
 	loops = ceilf((float)(dt.end_freq - dt.start_freq) / 20);
