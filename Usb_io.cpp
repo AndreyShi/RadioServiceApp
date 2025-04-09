@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include <winerror.h>
 //ERROR_IO_PENDING
-GUID Guid;
+
 wchar_t DevicePath[MAX_PATH];
 
 struct PIPE_ID
@@ -16,53 +16,20 @@ WINUSB_INTERFACE_HANDLE InterfaceHandle;
 #define STM32_USBVID      L"vid_03eb"
 #define CYPRESS_BOARD     L"vid_04b4"
 
+//this GUID 4D1E55B2 - F16F - 11CF - 88CB - 001111000030 lpa350 working as HID
 DEFINE_GUID(guid_lpa350board , 0x4D1E55B2, 0xF16F, 0x11CF, 0x88, 0xCB, 0x00, 0x11, 0x11, 0x00, 0x00, 0x30);//ok
-DEFINE_GUID(guid_RsUSBWinUSb , 0xfbb76182, 0xa06d, 0x4f02, 0x9a, 0xc4, 0x79, 0x12, 0x89, 0xea, 0xf3, 0x2c);//pending testing
-DEFINE_GUID(guid_CYPRESSCyUSb, 0xA5DCBF10, 0x6530, 0x11D2, 0x90, 0x1f, 0x00, 0xC0, 0x4F, 0xB9, 0x51, 0xED);//pending testing
+//fbb76182-a06d-4f02-9ac4-791289eaf32c RsUSB.inf
+//this GUID i took from end of RsUSB.inf file, it is not class GUID 
+DEFINE_GUID(guid_RsUSBWinUSb , 0xfbb76182, 0xa06d, 0x4f02, 0x9a, 0xc4, 0x79, 0x12, 0x89, 0xea, 0xf3, 0x2c);//ok
+//{A5DCBF10 - 6530 - 11D2 - 901F - 00C04FB951ED} Cypress board and working with CyUsb driver
+DEFINE_GUID(guid_CYPRESSCyUSb, 0xA5DCBF10, 0x6530, 0x11D2, 0x90, 0x1f, 0x00, 0xC0, 0x4F, 0xB9, 0x51, 0xED);//ok
 
-bool get_path(const wchar_t* device)
+static bool get_path(const wchar_t* device, const GUID Guid)
 {
 	char	Product[253];
 	std::string	Prod;
 	bool result = 0;
-
 	HDEVINFO info;
-	//HidD_GetHidGuid(&Guid);
-	//{A5DCBF10 - 6530 - 11D2 - 901F - 00C04FB951ED} GUID_DEVINTERFACE_USB_DEVICE and Cypress board
-	Guid.Data1 = 0xA5DCBF10;
-	Guid.Data2 = 0x6530;
-	Guid.Data3 = 0x11D2;
-
-	Guid.Data4[0] = 0x90;
-	Guid.Data4[1] = 0x1F;
-
-	Guid.Data4[2] = 0x00;
-	Guid.Data4[3] = 0xC0;
-	Guid.Data4[4] = 0x4F;
-	Guid.Data4[5] = 0xB9;
-	Guid.Data4[6] = 0x51;
-	Guid.Data4[7] = 0xED;
-	//fbb76182-a06d-4f02-9ac4-791289eaf32c RsUSB.inf
-	//this GUID i took from end of RsUSB.inf file, it is not class GUID 
-	Guid.Data1 = 0xfbb76182;
-	Guid.Data2 = 0xa06d;
-	Guid.Data3 = 0x4f02;
-
-	Guid.Data4[0] = 0x9a;
-	Guid.Data4[1] = 0xc4;
-
-	Guid.Data4[2] = 0x79;
-	Guid.Data4[3] = 0x12;
-	Guid.Data4[4] = 0x89;
-	Guid.Data4[5] = 0xea;
-	Guid.Data4[6] = 0xf3;
-	Guid.Data4[7] = 0x2c;
-
-	//this GUID 4D1E55B2 - F16F - 11CF - 88CB - 001111000030
-	//Guid = guid_lpa350board;
-
-
-
 
 	info = SetupDiGetClassDevs(&Guid, NULL, NULL, DIGCF_PRESENT | DIGCF_INTERFACEDEVICE);
 	if (info != INVALID_HANDLE_VALUE)
@@ -104,7 +71,7 @@ bool get_path(const wchar_t* device)
 	return result;
 }
 
-BOOL QueryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hDeviceHandle, PIPE_ID* pipeid)
+static BOOL QueryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hDeviceHandle, PIPE_ID* pipeid)
 {
 	if (hDeviceHandle == INVALID_HANDLE_VALUE)
 	{
@@ -178,7 +145,7 @@ int InitUsb(void){
 	const wchar_t* pj[] = { _T("Привет!\n") };
 
 	printf("%s", *p);
-	int gp = get_path(CYPRESS_BOARD);
+	int gp = get_path(CYPRESS_BOARD, guid_CYPRESSCyUSb);
 	printf("get_path: %d\n", gp);
 	if (gp != 0){
 		wprintf(L"DevicePath %s\n", DevicePath);
