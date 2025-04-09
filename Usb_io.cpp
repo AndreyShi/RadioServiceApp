@@ -16,6 +16,10 @@ WINUSB_INTERFACE_HANDLE InterfaceHandle;
 #define STM32_USBVID      L"vid_03eb"
 #define CYPRESS_BOARD     L"vid_04b4"
 
+DEFINE_GUID(guid_lpa350board , 0x4D1E55B2, 0xF16F, 0x11CF, 0x88, 0xCB, 0x00, 0x11, 0x11, 0x00, 0x00, 0x30);//ok
+DEFINE_GUID(guid_RsUSBWinUSb , 0xfbb76182, 0xa06d, 0x4f02, 0x9a, 0xc4, 0x79, 0x12, 0x89, 0xea, 0xf3, 0x2c);//pending testing
+DEFINE_GUID(guid_CYPRESSCyUSb, 0xA5DCBF10, 0x6530, 0x11D2, 0x90, 0x1f, 0x00, 0xC0, 0x4F, 0xB9, 0x51, 0xED);//pending testing
+
 bool get_path(const wchar_t* device)
 {
 	char	Product[253];
@@ -38,34 +42,6 @@ bool get_path(const wchar_t* device)
 	Guid.Data4[5] = 0xB9;
 	Guid.Data4[6] = 0x51;
 	Guid.Data4[7] = 0xED;
-	//ClassGUID = { 36FC9E60 - C465 - 11CF - 8056 - 444553540000 } check
-	Guid.Data1 = 0x36FC9E60;
-	Guid.Data2 = 0xC465;
-	Guid.Data3 = 0x11CF;
-
-	Guid.Data4[0] = 0x80;
-	Guid.Data4[1] = 0x56;
-
-	Guid.Data4[2] = 0x44;
-	Guid.Data4[3] = 0x45;
-	Guid.Data4[4] = 0x53;
-	Guid.Data4[5] = 0x54;
-	Guid.Data4[6] = 0x00;
-	Guid.Data4[7] = 0x00;
-	//CYUSB3.GUID = "{AE18AA60-7F6A-11d4-97DD-00010229B959}" check
-	Guid.Data1 = 0xAE18AA60;
-	Guid.Data2 = 0x7F6A;
-	Guid.Data3 = 0x11d4;
-
-	Guid.Data4[0] = 0x97;
-	Guid.Data4[1] = 0xDD;
-
-	Guid.Data4[2] = 0x00;
-	Guid.Data4[3] = 0x01;
-	Guid.Data4[4] = 0x02;
-	Guid.Data4[5] = 0x29;
-	Guid.Data4[6] = 0xB9;
-	Guid.Data4[7] = 0x59;
 	//fbb76182-a06d-4f02-9ac4-791289eaf32c RsUSB.inf
 	//this GUID i took from end of RsUSB.inf file, it is not class GUID 
 	Guid.Data1 = 0xfbb76182;
@@ -82,7 +58,8 @@ bool get_path(const wchar_t* device)
 	Guid.Data4[6] = 0xf3;
 	Guid.Data4[7] = 0x2c;
 
-
+	//this GUID 4D1E55B2 - F16F - 11CF - 88CB - 001111000030
+	//Guid = guid_lpa350board;
 
 
 
@@ -193,7 +170,7 @@ BOOL QueryDeviceEndpoints(WINUSB_INTERFACE_HANDLE hDeviceHandle, PIPE_ID* pipeid
 	return bResult;
 }
 
-int c;
+
 
 int InitUsb(void){
 	setlocale(LC_ALL, "en_US.UTF-8");
