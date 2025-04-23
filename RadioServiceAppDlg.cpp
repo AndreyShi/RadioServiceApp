@@ -244,7 +244,7 @@ void CRadioServiceAppDlg::OnBnClickedInitialization(){
 
 void CRadioServiceAppDlg::OnBnClickedPusk(){
 
-#ifndef TESTING
+#ifdef TESTING
 	reset_pipe(0x82);
 	SetupUsbIN(0xc0, 0xab, 0, 0, 64);
 	for (int i = 0; i < 8; i++){
@@ -265,11 +265,11 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	}
 #endif
 
-#ifdef THREAD_TEST
+#ifndef THREAD_TEST
 	if (XferThread)
 	{
 		bLooping = false;
-		GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("пїЅпїЅпїЅпїЅпїЅ"));
+		GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("стоп"));
 		return;
 	}
 	SetupUsbOUT_init();
@@ -279,7 +279,7 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	bLooping = true;
 	loops = ceilf((float)(dt.end_freq - dt.start_freq) / 20);
 	XferThread = AfxBeginThread(XferLoop, this);
-	GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("пїЅпїЅпїЅпїЅ"));
+	GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("старт"));
 #endif
 }
 

@@ -145,7 +145,7 @@ int InitUsb(void){
 	const wchar_t* pj[] = { _T("Привет!\n") };
 
 	printf("%s", *p);
-	int gp = get_path(CYPRESS_BOARD, guid_CYPRESSCyUSb);
+	int gp = get_path(CYPRESS_BOARD, guid_RsUSBWinUSb);
 	printf("get_path: %d\n", gp);
 	if (gp != 0){
 		wprintf(L"DevicePath %s\n", DevicePath);
