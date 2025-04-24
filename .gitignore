@@ -4,3 +4,5 @@ ipch
 *.aps
 *.v12.suo
 *.opensdf
+#python virt env
+venv
