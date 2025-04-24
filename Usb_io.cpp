@@ -375,7 +375,8 @@ void read_usb_async(UINT8 pipeId, UINT8* buf, int max_cnt) {
 		if (res_wait == WAIT_OBJECT_0) //object was signaled
 		{
 			printf("event occured res_wait: %d\n", res_wait);
-			BOOL res_over = WinUsb_GetOverlappedResult(InterfaceHandle, &over, &recieved, TRUE);//get recieved cnt bytes
+			//get recieved cnt bytes in buf pointer, we passed it in func (WinUsb_ReadPipe) above 
+			BOOL res_over = WinUsb_GetOverlappedResult(InterfaceHandle, &over, &recieved, TRUE);
 			if (res_over == 0)
 			{
 				printf("WinUsb_GetOverlappedResult GetLastError: %d  recieved %d\n", GetLastError(), recieved);
