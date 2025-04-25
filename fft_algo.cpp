@@ -58,6 +58,19 @@ int calculate_fft(){
 	memcpy(shifted_fft + complex_count / 2, fft_dBm, complex_count / 2 * sizeof(double));
 
 	// Сохраняем результаты в файл
+	/*
+	#read file in python and build graph
+	import pandas as pd
+	import matplotlib.pyplot as plt
+
+	df = pd.read_csv('fft_results.csv')
+	plt.plot(df['Frequency(MHz)'], df['Amplitude(dBm)'])
+	plt.xlabel('Frequency (MHz)')
+	plt.ylabel('Amplitude (dBm)')
+	plt.title('FFT Spectrum')
+	plt.grid(True)
+	plt.show()
+	*/
 	FILE* out_file = fopen("fft_results.csv", "w");
 	fprintf(out_file, "Frequency(MHz),Amplitude(dBm)\n");
 
