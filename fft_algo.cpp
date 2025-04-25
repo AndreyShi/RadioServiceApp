@@ -6,7 +6,7 @@
 
 static size_t read_hex_file(const char* filename, uint8_t** data);
 
-int calculate_fft(){
+int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 	uint8_t* byte_array = NULL;
 	size_t byte_count = read_hex_file("30_5.txt", &byte_array);
 
@@ -77,6 +77,10 @@ int calculate_fft(){
 	for (size_t i = 0; i < complex_count; i++) {
 		double freq = F_START + (F_END - F_START) * i / complex_count;
 		fprintf(out_file, "%f,%f\n", freq, shifted_fft[i]);
+		CRadioServiceAppDlg::FrequencyData data;
+		data.frequency = freq;
+		data.amplitude = shifted_fft[i];
+		pDlgFrame->m_frequencyData.push_back(data);
 	}
 	fclose(out_file);
 

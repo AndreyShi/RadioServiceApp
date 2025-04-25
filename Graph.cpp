@@ -244,7 +244,7 @@ void GraphHandlerSinDoubleBuffer(CRadioServiceAppDlg* pDlgFrame){
 
 	// Параметры графика sin(x)
 	const double xMin = 0;
-	const double xMax = 4 * 3.1416;
+	const double xMax = 14 * 3.1416;
 	const double yMin = -1.2;
 	const double yMax = 1.2;
 
@@ -321,6 +321,231 @@ void GraphHandlerSinDoubleBuffer(CRadioServiceAppDlg* pDlgFrame){
 	memDC.TextOutW(graphRect.right + 5, graphRect.bottom + 5, L"x");
 	memDC.TextOutW(graphRect.left - 30, graphRect.bottom + 5, L"0");
 
+	// 3. Копируем буфер на экран
+	pDC.BitBlt(0, 0, clientRect.Width(), clientRect.Height(),
+		&memDC, 0, 0, SRCCOPY);
+
+	// 4. Восстанавливаем старый битмап
+	memDC.SelectObject(pOldBitmap);
+}
+
+void GraphHandlerSinDoubleBufferScroll(CRadioServiceAppDlg* pDlgFrame)
+{
+	CPaintDC pDC(pDlgFrame);
+	CRect clientRect;
+	pDlgFrame->GetClientRect(&clientRect);
+
+	// Создаем буфер в памяти
+	CDC memDC;
+	memDC.CreateCompatibleDC(&pDC);
+	CBitmap memBitmap;
+	memBitmap.CreateCompatibleBitmap(&pDC, clientRect.Width(), clientRect.Height());
+	CBitmap* pOldBitmap = memDC.SelectObject(&memBitmap);
+
+	// Очищаем буфер
+	memDC.FillSolidRect(clientRect, RGB(255, 255, 255));
+
+	// Учитываем масштаб и прокрутку
+	double zoom = pDlgFrame->m_dZoomFactor;
+	CPoint scrollPos = pDlgFrame->m_ScrollPos;
+
+	// Виртуальные размеры графика
+	int virtualWidth = static_cast<int>(4 * 3.1416 * 100 * zoom);
+	int virtualHeight = static_cast<int>(600 * zoom);
+
+	// Область графика
+	CRect graphRect(-scrollPos.x, -scrollPos.y,
+		virtualWidth - scrollPos.x,
+		virtualHeight - scrollPos.y);
+
+	// Рисуем оси координат
+	CPen axisPen(PS_SOLID, 2, RGB(0, 0, 0));
+	memDC.SelectObject(&axisPen);
+
+	// Ось X (с учетом прокрутки)
+	int axisYPos = static_cast<int>(300 * zoom) - scrollPos.y; // Центр по Y
+	memDC.MoveTo(graphRect.left, axisYPos);
+	memDC.LineTo(graphRect.right, axisYPos);
+
+	// Ось Y (с учетом прокрутки)
+	int axisXPos = 50 - scrollPos.x; // Фиксированное смещение по X
+	memDC.MoveTo(axisXPos, graphRect.top);
+	memDC.LineTo(axisXPos, graphRect.bottom);
+
+	// Рисуем график sin(x) с учетом масштаба и прокрутки
+	CPen graphPen(PS_SOLID, 2, RGB(0, 0, 255));
+	memDC.SelectObject(&graphPen);
+
+	const int pointsCount = 1000;
+	CPoint prevPoint;
+	bool firstPoint = true;
+
+	for (int i = 0; i <= pointsCount; ++i) {
+		double x = 4 * 3.1416 * i / pointsCount;
+		double y = sin(x);
+
+		int pixelX = static_cast<int>(x * 100 * zoom) - scrollPos.x;
+		int pixelY = axisYPos - static_cast<int>(y * 100 * zoom);
+
+		if (!firstPoint) {
+			memDC.MoveTo(prevPoint.x, prevPoint.y);
+			memDC.LineTo(pixelX, pixelY);
+		}
+
+		prevPoint = CPoint(pixelX, pixelY);
+		firstPoint = false;
+	}
+
+	// Отображаем текущий масштаб
+	CString status;
+	status.Format(L"Масштаб: %.1fx | Прокрутка: (%d, %d)",
+		zoom, scrollPos.x, scrollPos.y);
+	memDC.TextOutW(10, 10, status);
+
+	// Копируем буфер на экран
+	pDC.BitBlt(0, 0, clientRect.Width(), clientRect.Height(),
+		&memDC, 0, 0, SRCCOPY);
+
+	// Восстанавливаем ресурсы
+	memDC.SelectObject(pOldBitmap);
+}
+
+void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame)
+{
+
+	CPaintDC pDC(pDlgFrame);
+	CRect clientRect;
+	pDlgFrame->GetClientRect(&clientRect);
+
+	if (pDlgFrame->m_frequencyData.empty()) {
+		
+		//pDC.TextOutW(10, 10, L"Нет данных для отображения");
+		printf("m_frequencyData is empty, load 30_5 data\n");
+		for (int i = 0; i < 512; i+=2){		
+			CRadioServiceAppDlg::FrequencyData data;
+			data.frequency = fft30_5[i];
+			data.amplitude = fft30_5[i + 1];
+			pDlgFrame->m_frequencyData.push_back(data);
+		}
+
+		//return;
+	}
+
+	// 1. Создаем буфер в памяти
+	CDC memDC;
+	memDC.CreateCompatibleDC(&pDC);
+	CBitmap memBitmap;
+	memBitmap.CreateCompatibleBitmap(&pDC, clientRect.Width(), clientRect.Height());
+	CBitmap* pOldBitmap = memDC.SelectObject(&memBitmap);
+
+	// 2. Очищаем буфер
+	memDC.FillSolidRect(clientRect, RGB(255, 255, 255));
+
+	// Область графика с отступами
+	CRect graphRect = clientRect;
+	graphRect.DeflateRect(50, 40, 40, 50);
+
+	// Находим минимальные и максимальные значения
+	double minFreq = pDlgFrame->m_frequencyData.front().frequency;
+	double maxFreq = pDlgFrame->m_frequencyData.back().frequency;
+	double minAmp = pDlgFrame->m_frequencyData[0].amplitude;
+	double maxAmp = pDlgFrame->m_frequencyData[0].amplitude;
+
+	for (const auto& data : pDlgFrame->m_frequencyData) {
+		if (data.amplitude < minAmp) minAmp = data.amplitude;
+		if (data.amplitude > maxAmp) maxAmp = data.amplitude;
+	}
+
+	// Добавляем немного места по краям
+	minAmp -= 5;
+	maxAmp += 5;
+
+	// Рисуем оси координат
+	CPen axisPen(PS_SOLID, 2, RGB(0, 0, 0));
+	memDC.SelectObject(&axisPen);
+
+	// Ось X (горизонтальная)
+	memDC.MoveTo(graphRect.left, graphRect.bottom);
+	memDC.LineTo(graphRect.right, graphRect.bottom);
+
+	// Ось Y (вертикальная)
+	memDC.MoveTo(graphRect.left, graphRect.bottom);
+	memDC.LineTo(graphRect.left, graphRect.top);
+
+	// Рисуем сетку
+	CPen gridPen(PS_DOT, 1, RGB(200, 200, 200));
+	memDC.SelectObject(&gridPen);
+
+	// Вертикальные линии сетки (каждые 0.1 МГц)
+	for (double freq = minFreq; freq <= maxFreq; freq += 0.1) {
+		int pixelX = graphRect.left + static_cast<int>(
+			(freq - minFreq) / (maxFreq - minFreq) * graphRect.Width());
+
+		memDC.MoveTo(pixelX, graphRect.bottom);
+		memDC.LineTo(pixelX, graphRect.top);
+
+		// Подписи на оси X (каждые 0.5 МГц)
+		if (fmod(freq, 0.5) < 0.01) {
+			CString label;
+			label.Format(L"%.1f", freq);
+			memDC.TextOutW(pixelX - 15, graphRect.bottom + 5, label);
+		}
+	}
+
+	// Горизонтальные линии сетки (каждые 10 dBm)
+	for (double amp = floor(minAmp / 10) * 10; amp <= maxAmp; amp += 10) {
+		int pixelY = graphRect.bottom - static_cast<int>(
+			(amp - minAmp) / (maxAmp - minAmp) * graphRect.Height());
+
+		memDC.MoveTo(graphRect.left, pixelY);
+		memDC.LineTo(graphRect.right, pixelY);
+
+		// Подписи на оси Y
+		CString label;
+		label.Format(L"%.0f", amp);
+		memDC.TextOutW(graphRect.left - 45, pixelY - 8, label);
+	}
+
+	// Рисуем график
+	CPen graphPen(PS_SOLID, 2, RGB(0, 0, 255));
+	memDC.SelectObject(&graphPen);
+
+	CPoint prevPoint;
+	bool firstPoint = true;
+
+	for (const auto& data : pDlgFrame->m_frequencyData) {
+		int pixelX = graphRect.left + static_cast<int>(
+			(data.frequency - minFreq) / (maxFreq - minFreq) * graphRect.Width());
+
+		int pixelY = graphRect.bottom - static_cast<int>(
+			(data.amplitude - minAmp) / (maxAmp - minAmp) * graphRect.Height());
+
+		if (!firstPoint) {
+			memDC.MoveTo(prevPoint.x, prevPoint.y);
+			memDC.LineTo(pixelX, pixelY);
+		}
+
+		prevPoint = CPoint(pixelX, pixelY);
+		firstPoint = false;
+	}
+
+	// Подписи осей
+	memDC.SetBkMode(TRANSPARENT);
+	memDC.SetTextColor(RGB(0, 0, 0));
+	memDC.TextOutW(graphRect.left - 35, graphRect.top - 30, L"Амплитуда dBm");
+	memDC.TextOutW(graphRect.right - 55, graphRect.bottom + 20, L"Частота (МГц)");
+
+	// Для добавления маркеров точек данных
+	/*CBrush pointBrush(RGB(255, 0, 0));
+	memDC.SelectObject(&pointBrush);
+	for (const auto& data : pDlgFrame->m_frequencyData) {
+		int pixelX = graphRect.left + static_cast<int>(
+			(data.frequency - minFreq) / (maxFreq - minFreq) * graphRect.Width());
+		int pixelY = graphRect.bottom - static_cast<int>(
+			(data.amplitude - minAmp) / (maxAmp - minAmp) * graphRect.Height());
+		memDC.Ellipse(pixelX - 2, pixelY - 2, pixelX + 2, pixelY + 2);
+	}
+	*/
 	// 3. Копируем буфер на экран
 	pDC.BitBlt(0, 0, clientRect.Width(), clientRect.Height(),
 		&memDC, 0, 0, SRCCOPY);

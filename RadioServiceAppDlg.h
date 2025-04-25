@@ -15,10 +15,21 @@ public:
 	int loops;
 	CRadioServiceAppDlg(CWnd* pParent = NULL);	// standard constructor
 	device_data getting_data();
+
 // Dialog Data
 	enum { IDD = IDD_RADIOSERVICEAPP_DIALOG };
 
-	protected:
+	double m_dZoomFactor;  // Коэффициент масштабирования
+	CPoint m_ScrollPos;    // Позиция прокрутки (в пикселях)
+	CSize m_TotalSize;     // Общий размер виртуального пространства
+	void UpdateScrollBars();
+
+	struct FrequencyData {
+		double frequency;
+		double amplitude;
+	};
+	std::vector<FrequencyData> m_frequencyData;
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
 // Implementation
@@ -31,6 +42,9 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedCancel();

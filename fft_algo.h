@@ -2,4 +2,4 @@
 рассчет fft
 */
 
-int calculate_fft(void);
+int calculate_fft(CRadioServiceAppDlg* pDlgFrame);

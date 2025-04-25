@@ -53,6 +53,7 @@ CRadioServiceAppDlg::CRadioServiceAppDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CRadioServiceAppDlg::IDD, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+
 }
 /*
 0 dB - 3F
@@ -124,6 +125,9 @@ BEGIN_MESSAGE_MAP(CRadioServiceAppDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_SIZE()
+	//ON_WM_HSCROLL()
+	//ON_WM_VSCROLL()
+	//ON_WM_MOUSEWHEEL()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDCANCEL,  &CRadioServiceAppDlg::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_INIT, &CRadioServiceAppDlg::OnBnClickedInitialization)
@@ -139,8 +143,168 @@ void CRadioServiceAppDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
 	Invalidate();  // Принудительная перерисовка при изменении размера
+	//UpdateScrollBars();
 }
 // CRadioServiceAppDlg message handlers
+
+void CRadioServiceAppDlg::UpdateScrollBars()
+{
+	CRect clientRect;
+	GetClientRect(&clientRect);
+
+	SCROLLINFO si;
+	si.cbSize = sizeof(SCROLLINFO);
+
+	// Горизонтальная прокрутка
+	si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
+	si.nMin = 0;
+	si.nMax = m_TotalSize.cx;
+	si.nPage = clientRect.Width();
+	si.nPos = m_ScrollPos.x;
+	SetScrollInfo(SB_HORZ, &si, TRUE);
+
+	// Вертикальная прокрутка
+	si.nMax = m_TotalSize.cy;
+	si.nPage = clientRect.Height();
+	si.nPos = m_ScrollPos.y;
+	SetScrollInfo(SB_VERT, &si, TRUE);
+
+	// Ограничиваем позицию прокрутки
+	m_ScrollPos.x = max(0, min(m_ScrollPos.x, m_TotalSize.cx - clientRect.Width()));
+	m_ScrollPos.y = max(0, min(m_ScrollPos.y, m_TotalSize.cy - clientRect.Height()));
+}
+
+void CRadioServiceAppDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	SCROLLINFO si;
+	si.cbSize = sizeof(SCROLLINFO);
+	si.fMask = SIF_ALL;
+	GetScrollInfo(SB_HORZ, &si);
+
+	int nNewPos = si.nPos;
+	int nPageSize = si.nPage;  // Теперь правильно получаем размер страницы
+
+	switch (nSBCode)
+	{
+	case SB_LINELEFT:  nNewPos -= 10; break;
+	case SB_LINERIGHT: nNewPos += 10; break;
+	case SB_PAGELEFT:  nNewPos -= nPageSize; break;
+	case SB_PAGERIGHT: nNewPos += nPageSize; break;
+	case SB_THUMBTRACK: nNewPos = nPos; break;
+	default: break;
+	}
+
+	// Ограничиваем новую позицию
+	CRect clientRect;
+	GetClientRect(&clientRect);
+	nNewPos = max(0, min(nNewPos, m_TotalSize.cx - clientRect.Width()));
+
+	if (nNewPos != si.nPos)
+	{
+		si.nPos = nNewPos;
+		si.fMask = SIF_POS;
+		SetScrollInfo(SB_HORZ, &si, TRUE);
+		m_ScrollPos.x = nNewPos;
+		Invalidate();
+	}
+
+	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
+}
+
+void CRadioServiceAppDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	SCROLLINFO si;
+	si.cbSize = sizeof(SCROLLINFO);
+	si.fMask = SIF_ALL;
+	GetScrollInfo(SB_VERT, &si);
+
+	int nNewPos = si.nPos;
+	int nPageSize = si.nPage;  // Теперь правильно получаем размер страницы
+
+	switch (nSBCode)
+	{
+	case SB_LINEUP:    nNewPos -= 10; break;
+	case SB_LINEDOWN:  nNewPos += 10; break;
+	case SB_PAGEUP:    nNewPos -= nPageSize; break;
+	case SB_PAGEDOWN:  nNewPos += nPageSize; break;
+	case SB_THUMBTRACK: nNewPos = nPos; break;
+	default: break;
+	}
+
+	// Ограничиваем новую позицию
+	CRect clientRect;
+	GetClientRect(&clientRect);
+	nNewPos = max(0, min(nNewPos, m_TotalSize.cy - clientRect.Height()));
+
+	if (nNewPos != si.nPos)
+	{
+		si.nPos = nNewPos;
+		si.fMask = SIF_POS;
+		SetScrollInfo(SB_VERT, &si, TRUE);
+		m_ScrollPos.y = nNewPos;
+		Invalidate();
+	}
+
+	CDialogEx::OnVScroll(nSBCode, nPos, pScrollBar);
+}
+
+BOOL CRadioServiceAppDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
+	if (nFlags & MK_CONTROL) // Если зажат Ctrl - масштабируем
+	{
+		// Преобразуем координаты мыши
+		ScreenToClient(&pt);
+
+		// Сохраняем текущие виртуальные координаты курсора
+		double virtualX = m_ScrollPos.x + pt.x / m_dZoomFactor;
+		double virtualY = m_ScrollPos.y + pt.y / m_dZoomFactor;
+
+		// Изменяем масштаб
+		double oldZoom = m_dZoomFactor;
+		m_dZoomFactor *= (zDelta > 0) ? 1.1 : 0.9;
+		m_dZoomFactor = max(0.1, min(m_dZoomFactor, 10.0));
+
+		// Пересчитываем позицию прокрутки для сохранения точки под курсором
+		m_ScrollPos.x = static_cast<int>(virtualX - pt.x / m_dZoomFactor);
+		m_ScrollPos.y = static_cast<int>(virtualY - pt.y / m_dZoomFactor);
+
+		// Обновляем общий размер
+		m_TotalSize = CSize(
+			static_cast<int>(800 * m_dZoomFactor),
+			static_cast<int>(600 * m_dZoomFactor));
+
+		UpdateScrollBars();
+		Invalidate();
+		return TRUE; // Сообщение обработано
+	}
+	else // Обычная прокрутка
+	{
+		// Прокрутка по вертикали
+		SCROLLINFO si;
+		si.cbSize = sizeof(SCROLLINFO);
+		si.fMask = SIF_ALL;
+		GetScrollInfo(SB_VERT, &si);
+
+		int nNewPos = si.nPos - zDelta / WHEEL_DELTA * 30; // 30 - скорость прокрутки
+
+		CRect clientRect;
+		GetClientRect(&clientRect);
+		nNewPos = max(0, min(nNewPos, m_TotalSize.cy - clientRect.Height()));
+
+		if (nNewPos != si.nPos)
+		{
+			si.nPos = nNewPos;
+			si.fMask = SIF_POS;
+			SetScrollInfo(SB_VERT, &si, TRUE);
+			m_ScrollPos.y = nNewPos;
+			Invalidate();
+		}
+		return TRUE; // Сообщение обработано
+	}
+
+	return CDialogEx::OnMouseWheel(nFlags, zDelta, pt);
+}
+
 
 BOOL CRadioServiceAppDlg::OnInitDialog()
 {
@@ -200,6 +364,11 @@ BOOL CRadioServiceAppDlg::OnInitDialog()
 	fftw_free(in);
 	fftw_free(out);
 
+	m_dZoomFactor = 1.0;
+	m_ScrollPos = CPoint(0, 0);
+	m_TotalSize = CSize(800, 600); // Начальный размер виртуального пространства
+	//UpdateScrollBars();
+	//calculate_fft(this);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -245,7 +414,9 @@ void CRadioServiceAppDlg::OnPaint()
 		//CDialogEx::OnPaint();
 		//берем отрисовку всего фона на себя, остальный контролы кнопки и тд сами себя рисуют
 		//GraphHandlerSin(this);
-		GraphHandlerSinDoubleBuffer(this);
+		//GraphHandlerSinDoubleBuffer(this);
+		//GraphHandlerSinDoubleBufferScroll(this);
+		GraphHandler_fft(this);
 	}
 }
 
@@ -269,8 +440,10 @@ void CRadioServiceAppDlg::OnBnClickedInitialization(){
 }
 
 void CRadioServiceAppDlg::OnBnClickedPusk(){
-
-	printf("calculate_fft :%d",calculate_fft());
+	//fft30_5[157]
+	m_frequencyData[78].amplitude = m_frequencyData[78].amplitude + 5.0F;
+	printf("m_frequencyData[78].amplitude :%f\n",	m_frequencyData[78].amplitude);
+	Invalidate();
 	return;
 
 #ifdef TESTING
@@ -306,7 +479,7 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	SetupUsbOUT_settings(dt);
 
 	bLooping = true;
-	loops = ceilf((float)(dt.end_freq - dt.start_freq) / 20);
+	loops = ceilf((float)(dt.end_freq - dt.start_freq) / 2);
 	XferThread = AfxBeginThread(XferLoop, this);
 	GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("старт"));
 #endif
