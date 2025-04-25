@@ -178,6 +178,24 @@ BOOL CRadioServiceAppDlg::OnInitDialog()
 	GetDlgItem(IDC_END_FREQ)->SetWindowTextW(_T("750"));
 	((CComboBox*)GetDlgItem(IDC_COMBO_ATTENU))->SelectString(0,_T("0 dB"));
 	XferThread = NULL;
+
+	fftw_complex *in, *out;
+	fftw_plan p;
+	int N = 1024;
+
+	in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)* N);
+	out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)* N);
+
+	p = fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+	fftw_execute(p);
+
+	printf("FFTW worked!\n");
+
+	fftw_destroy_plan(p);
+	fftw_free(in);
+	fftw_free(out);
+
+
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -219,7 +237,43 @@ void CRadioServiceAppDlg::OnPaint()
 	}
 	else
 	{
-		CDialogEx::OnPaint();
+		//CDialogEx::OnPaint();
+		//отрисовка графиков MFC CPaintDC запрос в deepseek
+		CPaintDC dc(this);  // Создаём контекст устройства для WM_PAINT
+
+		// Очищаем фон
+		CRect rect;
+		GetClientRect(&rect);
+		dc.FillSolidRect(rect, RGB(255, 255, 255));  // Белый фон
+
+		// Настраиваем перья
+		CPen axisPen(PS_SOLID, 2, RGB(0, 0, 0));    // Перо для осей (чёрное)
+		CPen graphPen(PS_SOLID, 2, RGB(255, 0, 0)); // Перо для графика (красное)
+
+		// Рисуем оси X и Y
+		dc.SelectObject(&axisPen);
+		dc.MoveTo(50, 50);
+		dc.LineTo(50, 250);  // Ось Y
+		dc.LineTo(350, 250); // Ось X
+
+		// Данные графика (линия)
+		std::vector<CPoint> points = {
+			{ 100, 200 }, { 150, 180 }, { 200, 150 }, { 250, 220 }, { 300, 100 }
+		};
+
+		// Рисуем линию графика
+		dc.SelectObject(&graphPen);
+		dc.MoveTo(points[0]);
+		for (size_t i = 1; i < points.size(); ++i) {
+			dc.LineTo(points[i]);
+		}
+
+		// Рисуем точки на графике
+		CBrush pointBrush(RGB(0, 0, 255)); // Синие точки
+		dc.SelectObject(&pointBrush);
+		for (const auto& pt : points) {
+			dc.Ellipse(pt.x - 3, pt.y - 3, pt.x + 3, pt.y + 3);
+		}
 	}
 }
 

@@ -43,8 +43,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(WindowsSDK_IncludePath);$(VC_IncludePath);$(WindowsSdk_71A_IncludePath);</IncludePath>
-    <LibraryPath>$(WindowsSDK_IncludePath);$(VC_LibraryPath_x86);$(WindowsSdk_71A_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
+    <IncludePath>$(WindowsSDK_IncludePath);$(VC_IncludePath);$(WindowsSdk_71A_IncludePath);fft_lib;</IncludePath>
+    <LibraryPath>$(WindowsSDK_IncludePath);$(VC_LibraryPath_x86);$(WindowsSdk_71A_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);fft_lib;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -59,7 +59,9 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SetupAPI.Lib;winusb.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SetupAPI.Lib;winusb.lib;libfftw3f-3.lib;libfftw3-3.lib;libfftw3l-3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
