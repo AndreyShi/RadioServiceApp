@@ -11,8 +11,8 @@
 #define new DEBUG_NEW
 #endif
 
-#include "ConsoleDebug.h"
-#include "RadioServiceAppDlg.h"
+//#include "ConsoleDebug.h"
+//#include "RadioServiceAppDlg.h"
 
 // CAboutDlg dialog used for App About
 
@@ -123,6 +123,7 @@ void CRadioServiceAppDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CRadioServiceAppDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
+	ON_WM_SIZE()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDCANCEL,  &CRadioServiceAppDlg::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_INIT, &CRadioServiceAppDlg::OnBnClickedInitialization)
@@ -134,7 +135,11 @@ BEGIN_MESSAGE_MAP(CRadioServiceAppDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_Abort, &CRadioServiceAppDlg::OnBnClickedButtonAbort)
 END_MESSAGE_MAP()
 
-
+void CRadioServiceAppDlg::OnSize(UINT nType, int cx, int cy)
+{
+	CDialogEx::OnSize(nType, cx, cy);
+	Invalidate();  // Принудительная перерисовка при изменении размера
+}
 // CRadioServiceAppDlg message handlers
 
 BOOL CRadioServiceAppDlg::OnInitDialog()
@@ -238,42 +243,8 @@ void CRadioServiceAppDlg::OnPaint()
 	else
 	{
 		//CDialogEx::OnPaint();
-		//отрисовка графиков MFC CPaintDC запрос в deepseek
-		CPaintDC dc(this);  // Создаём контекст устройства для WM_PAINT
-
-		// Очищаем фон
-		CRect rect;
-		GetClientRect(&rect);
-		dc.FillSolidRect(rect, RGB(255, 255, 255));  // Белый фон
-
-		// Настраиваем перья
-		CPen axisPen(PS_SOLID, 2, RGB(0, 0, 0));    // Перо для осей (чёрное)
-		CPen graphPen(PS_SOLID, 2, RGB(255, 0, 0)); // Перо для графика (красное)
-
-		// Рисуем оси X и Y
-		dc.SelectObject(&axisPen);
-		dc.MoveTo(50, 50);
-		dc.LineTo(50, 250);  // Ось Y
-		dc.LineTo(350, 250); // Ось X
-
-		// Данные графика (линия)
-		std::vector<CPoint> points = {
-			{ 100, 200 }, { 150, 180 }, { 200, 150 }, { 250, 220 }, { 300, 100 }
-		};
-
-		// Рисуем линию графика
-		dc.SelectObject(&graphPen);
-		dc.MoveTo(points[0]);
-		for (size_t i = 1; i < points.size(); ++i) {
-			dc.LineTo(points[i]);
-		}
-
-		// Рисуем точки на графике
-		CBrush pointBrush(RGB(0, 0, 255)); // Синие точки
-		dc.SelectObject(&pointBrush);
-		for (const auto& pt : points) {
-			dc.Ellipse(pt.x - 3, pt.y - 3, pt.x + 3, pt.y + 3);
-		}
+		//берем отрисовку всего фона на себя, остальный контролы кнопки и тд сами себя рисуют
+		GraphHandlerSin(this);
 	}
 }
 

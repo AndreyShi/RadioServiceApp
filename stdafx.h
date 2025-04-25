@@ -41,12 +41,13 @@
 #include <conio.h>
 #include "Usb_io.h" 
 
+
 #include "fft_lib\fftw3.h"      //fftw support
 #include <vector>
 
 #include "RadioServiceApp.h"
 #include "RadioServiceAppDlg.h"
-
+#include "Graph.h"             // graph included after RadioServiceAppDlg.h it's ok, no need include stdafx in file
 
 
 #ifdef _UNICODE
