@@ -28,4 +28,6 @@ void CreateConsole()
 	std::wclog.clear();
 	std::wcerr.clear();
 	std::wcin.clear();
+	//for indicating russian symbols in console
+	SetConsoleOutputCP(1251);
 }

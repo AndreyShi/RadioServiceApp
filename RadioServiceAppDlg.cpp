@@ -194,7 +194,7 @@ BOOL CRadioServiceAppDlg::OnInitDialog()
 	p = fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
 	fftw_execute(p);
 
-	printf("FFTW worked!\n");
+	printf("FFTW работает!\n");
 
 	fftw_destroy_plan(p);
 	fftw_free(in);
@@ -244,7 +244,8 @@ void CRadioServiceAppDlg::OnPaint()
 	{
 		//CDialogEx::OnPaint();
 		//берем отрисовку всего фона на себя, остальный контролы кнопки и тд сами себя рисуют
-		GraphHandlerSin(this);
+		//GraphHandlerSin(this);
+		GraphHandlerSinDoubleBuffer(this);
 	}
 }
 

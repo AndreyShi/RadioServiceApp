@@ -210,3 +210,121 @@ void GraphHandlerSin(CRadioServiceAppDlg* pDlgFrame){
 	dc.TextOutW(graphRect.right + 5, graphRect.bottom + 5, L"x");
 	dc.TextOutW(graphRect.left - 30, graphRect.bottom + 5, L"0");
 }
+
+void GraphHandlerSinDoubleBuffer(CRadioServiceAppDlg* pDlgFrame){
+	CPaintDC pDC(pDlgFrame);
+	CRect clientRect;
+	pDlgFrame->GetClientRect(&clientRect);
+
+	// 1. Создаем буфер в памяти
+	CDC memDC;
+	memDC.CreateCompatibleDC(&pDC);
+	CBitmap memBitmap;
+	memBitmap.CreateCompatibleBitmap(&pDC, clientRect.Width(), clientRect.Height());
+	CBitmap* pOldBitmap = memDC.SelectObject(&memBitmap);
+
+	// 2. Очищаем буфер
+	memDC.FillSolidRect(clientRect, RGB(255, 255, 255));
+
+	// Область графика с отступами
+	CRect graphRect = clientRect;
+	graphRect.DeflateRect(50, 40, 40, 50);
+
+	// Рисуем оси координат
+	CPen axisPen(PS_SOLID, 2, RGB(0, 0, 0));
+	memDC.SelectObject(&axisPen);
+
+	// Ось X (горизонтальная)
+	memDC.MoveTo(graphRect.left, graphRect.bottom);
+	memDC.LineTo(graphRect.right, graphRect.bottom);
+
+	// Ось Y (вертикальная)
+	memDC.MoveTo(graphRect.left, graphRect.bottom);
+	memDC.LineTo(graphRect.left, graphRect.top);
+
+	// Параметры графика sin(x)
+	const double xMin = 0;
+	const double xMax = 4 * 3.1416;
+	const double yMin = -1.2;
+	const double yMax = 1.2;
+
+	// Рисуем сетку
+	CPen gridPen(PS_DOT, 1, RGB(200, 200, 200));
+	memDC.SelectObject(&gridPen);
+
+	// Вертикальные линии сетки
+	for (double x = 0; x <= xMax; x += 3.1416 / 2) {
+		int pixelX = graphRect.left + static_cast<int>(
+			(x - xMin) / (xMax - xMin) * graphRect.Width());
+
+		memDC.MoveTo(pixelX, graphRect.bottom);
+		memDC.LineTo(pixelX, graphRect.top);
+
+		// Подписи на оси X
+		if (x > 0) {
+			CString label;
+			if (x == 3.1416) label = L"пи";
+			else if (x == 2 * 3.1416) label = L"2пи";
+			else if (x == 3 * 3.1416) label = L"3пи";
+			else if (x == 4 * 3.1416) label = L"4пи";
+			else label.Format(L"%.1f", x);
+
+			memDC.TextOutW(pixelX - 10, graphRect.bottom + 10, label);
+		}
+	}
+
+	// Горизонтальные линии сетки
+	for (double y = -1.0; y <= 1.0; y += 0.5) {
+		int pixelY = graphRect.bottom - static_cast<int>(
+			(y - yMin) / (yMax - yMin) * graphRect.Height());
+
+		memDC.MoveTo(graphRect.left, pixelY);
+		memDC.LineTo(graphRect.right, pixelY);
+
+		// Подписи на оси Y
+		CString label;
+		label.Format(L"%.1f", y);
+		memDC.TextOutW(graphRect.left - 40, pixelY - 8, label);
+	}
+
+	// Рисуем график sin(x)
+	CPen graphPen(PS_SOLID, 2, RGB(0, 0, 255));
+	memDC.SelectObject(&graphPen);
+
+	const int pointsCount = 200;
+	CPoint prevPoint;
+	bool firstPoint = true;
+
+	for (int i = 0; i <= pointsCount; ++i) {
+		double x = xMin + i * (xMax - xMin) / pointsCount;
+		double y = sin(x);
+
+		int pixelX = graphRect.left + static_cast<int>(
+			(x - xMin) / (xMax - xMin) * graphRect.Width());
+
+		int pixelY = graphRect.bottom - static_cast<int>(
+			(y - yMin) / (yMax - yMin) * graphRect.Height());
+
+		if (!firstPoint) {
+			memDC.MoveTo(prevPoint.x, prevPoint.y);
+			memDC.LineTo(pixelX, pixelY);
+		}
+
+		prevPoint = CPoint(pixelX, pixelY);
+		firstPoint = false;
+	}
+
+	// Подписи осей
+	memDC.SetBkMode(TRANSPARENT);
+	memDC.SetTextColor(RGB(0, 0, 0));
+	memDC.TextOutW(graphRect.left - 20, graphRect.top - 20, L"sin(x)");
+	memDC.TextOutW(graphRect.right + 5, graphRect.bottom + 5, L"x");
+	memDC.TextOutW(graphRect.left - 30, graphRect.bottom + 5, L"0");
+
+	// 3. Копируем буфер на экран
+	pDC.BitBlt(0, 0, clientRect.Width(), clientRect.Height(),
+		&memDC, 0, 0, SRCCOPY);
+
+	// 4. Восстанавливаем старый битмап
+	memDC.SelectObject(pOldBitmap);
+}
