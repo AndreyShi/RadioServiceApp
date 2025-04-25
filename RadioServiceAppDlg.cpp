@@ -269,6 +269,9 @@ void CRadioServiceAppDlg::OnBnClickedInitialization(){
 
 void CRadioServiceAppDlg::OnBnClickedPusk(){
 
+	printf("calculate_fft :%d",calculate_fft());
+	return;
+
 #ifdef TESTING
 	reset_pipe(0x82);
 	SetupUsbIN(0xc0, 0xab, 0, 0, 64);

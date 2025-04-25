@@ -48,7 +48,7 @@
 #include "RadioServiceApp.h"
 #include "RadioServiceAppDlg.h"
 #include "Graph.h"             // graph included after RadioServiceAppDlg.h it's ok, no need include stdafx in file
-
+#include "fft_algo.h"
 
 #ifdef _UNICODE
 #if defined _M_IX86

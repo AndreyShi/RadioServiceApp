@@ -105,6 +105,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleDebug.h" />
+    <ClInclude Include="fft_algo.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="RadioServiceApp.h" />
     <ClInclude Include="RadioServiceAppDlg.h" />
@@ -115,6 +116,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConsoleDebug.cpp" />
+    <ClCompile Include="fft_algo.cpp" />
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="RadioServiceApp.cpp" />
     <ClCompile Include="RadioServiceAppDlg.cpp" />
