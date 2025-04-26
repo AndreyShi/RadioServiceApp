@@ -444,6 +444,7 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	//m_frequencyData[78].amplitude = m_frequencyData[78].amplitude + 5.0F;
 	//printf("m_frequencyData[78].amplitude :%f\n",	m_frequencyData[78].amplitude);
 	//Invalidate();
+	//calculate_fft(this);
 	//return;
 
 #ifdef TESTING

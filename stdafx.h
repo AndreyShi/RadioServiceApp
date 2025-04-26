@@ -42,14 +42,14 @@
 
 
 
-#include "fft_lib\fftw3.h"      //fftw support
+#include "fftw3.h"              //fftw support
 #include <vector>
 
 #include "RadioServiceApp.h"
 #include "RadioServiceAppDlg.h"
 #include "Usb_io.h" 
-#include "Graph.h"             // graph included after RadioServiceAppDlg.h it's ok, no need include stdafx in file
-#include "fft_algo.h"
+#include "Graph.h"              // special included after RadioServiceAppDlg.h 
+#include "fft_algo.h"           // special included after RadioServiceAppDlg.h 
 
 #ifdef _UNICODE
 #if defined _M_IX86
