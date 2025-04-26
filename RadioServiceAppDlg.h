@@ -12,7 +12,6 @@ class CRadioServiceAppDlg : public CDialogEx
 public:
 	CWinThread *XferThread;
 	bool bLooping;
-	int loops;
 	CRadioServiceAppDlg(CWnd* pParent = NULL);	// standard constructor
 	struct device_data{
 		UINT16 start_freq;
@@ -20,6 +19,8 @@ public:
 		UINT8 attenua;
 	};
 	device_data getting_data();
+	device_data dt;
+	uint8_t* ptr_usb_data;
 
 	struct cur_time{
 		char st[13]; //14:25:36.423

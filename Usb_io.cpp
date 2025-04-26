@@ -306,13 +306,16 @@ the public members of the CBulkLoopDlg class.
 UINT XferLoop(LPVOID params) {
 
 	CRadioServiceAppDlg *dlg = (CRadioServiceAppDlg *)params;
-	printf("start XferLoop\n");
-	for (int i = 0; dlg->bLooping && i < dlg->loops; i++) {
+	int loops = ceilf((float)(dlg->dt.end_freq - dlg->dt.start_freq) / 2);
+	int usbbytescount = 0;
+	printf("start XferLoop, packets: %d %s\n", loops, dlg->get_cur_time().st);
+	for (int i = 0; dlg->bLooping && i < loops; i++) {
 		UCHAR buf[1024] = { 0 };
-		read_usb_sync(0x82, buf, 1024);
+		usbbytescount += read_usb_sync(0x82, buf, 1024);
 	}
-	printf("end XferLoop\n");
+	printf("end XferLoop %s\n", dlg->get_cur_time().st);
 	dlg->XferThread = NULL;
+	//calculate_fft(dlg);
 	return true;
 }
 
@@ -337,7 +340,7 @@ void write_usb(UINT8 pipeId, UINT8* buf, int max_cnt){
 		printf("WinUsb_WritePipe GetLastError: %d\n", GetLastError());
 	}
 }
-void read_usb_sync(UINT8 pipeId, UINT8* buf, int max_cnt){
+ULONG read_usb_sync(UINT8 pipeId, UINT8* buf, int max_cnt){
 	ULONG recieved = 0;
 	BOOL res_r = WinUsb_ReadPipe(InterfaceHandle, pipeId, buf, max_cnt, &recieved, NULL);
 	if (res_r == TRUE)
@@ -355,6 +358,7 @@ void read_usb_sync(UINT8 pipeId, UINT8* buf, int max_cnt){
 		printf("WinUsb_ReadPipe GetLastError: %d\n", GetLastError());
 		WinUsb_AbortPipe(InterfaceHandle, pipeId);
 	}
+	return recieved;
 }
 
 void read_usb_async(UINT8 pipeId, UINT8* buf, int max_cnt) {

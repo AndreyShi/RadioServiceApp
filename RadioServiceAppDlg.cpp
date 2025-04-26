@@ -53,7 +53,7 @@ CRadioServiceAppDlg::CRadioServiceAppDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CRadioServiceAppDlg::IDD, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-
+	ptr_usb_data = NULL;
 }
 /*
 0 dB - 3F
@@ -455,8 +455,8 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	//printf("m_frequencyData[78].amplitude :%f\n",	m_frequencyData[78].amplitude);
 	//Invalidate();
 	//calculate_fft(this);
-	printf("curr time: %s\n", get_cur_time().st);
-	return;
+	//printf("curr time: %s\n", get_cur_time().st);
+	//return;
 
 #ifdef TESTING
 	reset_pipe(0x82);
@@ -487,11 +487,10 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 		return;
 	}
 	SetupUsbOUT_init();
-	device_data dt = getting_data();
+	dt = getting_data();
 	SetupUsbOUT_settings(dt);
 
 	bLooping = true;
-	loops = ceilf((float)(dt.end_freq - dt.start_freq) / 2);
 	XferThread = AfxBeginThread(XferLoop, this);
 	GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("старт"));
 	//printf("we exit from OnBnClickedPusk()\n");

@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include <stdint.h>
+
 #define F_START 30.0     // МГц
 #define F_END 32.0       // МГц
 #define TARGET_PEAK -54.0 // dBm
@@ -8,7 +8,11 @@ static size_t read_hex_file(const char* filename, uint8_t** data);
 
 int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 	uint8_t* byte_array = NULL;
-	size_t byte_count = read_hex_file("30_5.txt", &byte_array);
+	size_t byte_count = 0;
+	if (pDlgFrame->ptr_usb_data == NULL)
+	{
+		byte_count = read_hex_file("30_5.txt", &byte_array);
+	}
 
 	// Проверяем, что данных достаточно для комплексных чисел (кратно 4)
 	if (byte_count % 4 != 0) {

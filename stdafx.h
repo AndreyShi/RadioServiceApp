@@ -39,7 +39,7 @@
 #include <winusb.h>             //WinUSB support
 #include <Setupapi.h>
 #include <conio.h>
-
+#include <stdint.h>
 
 
 #include "fftw3.h"              //fftw support
