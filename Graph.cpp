@@ -412,23 +412,18 @@ void GraphHandlerSinDoubleBufferScroll(CRadioServiceAppDlg* pDlgFrame)
 
 void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame)
 {
-
 	CPaintDC pDC(pDlgFrame);
 	CRect clientRect;
 	pDlgFrame->GetClientRect(&clientRect);
 
 	if (pDlgFrame->m_frequencyData.empty()) {
-		
-		//pDC.TextOutW(10, 10, L"Нет данных для отображения");
 		printf("m_frequencyData is empty, load 30_5 data\n");
-		for (int i = 0; i < 512; i+=2){		
+		for (int i = 0; i < 512; i += 2){
 			CRadioServiceAppDlg::FrequencyData data;
 			data.frequency = fft30_5[i];
 			data.amplitude = fft30_5[i + 1];
 			pDlgFrame->m_frequencyData.push_back(data);
 		}
-
-		//return;
 	}
 
 	// 1. Создаем буфер в памяти
@@ -443,7 +438,7 @@ void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame)
 
 	// Область графика с отступами
 	CRect graphRect = clientRect;
-    graphRect.DeflateRect(50, 40, 40, 50);
+	graphRect.DeflateRect(50, 40, 40, 50);
 
 	// Находим минимальные и максимальные значения
 	double minFreq = pDlgFrame->m_frequencyData.front().frequency;
@@ -481,6 +476,9 @@ void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame)
 		int pixelX = graphRect.left + static_cast<int>(
 			(freq - minFreq) / (maxFreq - minFreq) * graphRect.Width());
 
+		// Проверяем, чтобы линия не выходила за границы
+		if (pixelX < graphRect.left || pixelX > graphRect.right) continue;
+
 		memDC.MoveTo(pixelX, graphRect.bottom);
 		memDC.LineTo(pixelX, graphRect.top);
 
@@ -491,12 +489,14 @@ void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame)
 			memDC.TextOutW(pixelX - 15, graphRect.bottom + 5, label);
 		}
 	}
-	
-	
+
 	// Горизонтальные линии сетки (каждые 10 dBm)
 	for (double amp = floor(minAmp / 10) * 10; amp <= maxAmp; amp += 10) {
 		int pixelY = graphRect.bottom - static_cast<int>(
 			(amp - minAmp) / (maxAmp - minAmp) * graphRect.Height());
+
+		// Проверяем, чтобы линия не выходила за границы
+		if (pixelY < graphRect.top || pixelY > graphRect.bottom) continue;
 
 		memDC.MoveTo(graphRect.left, pixelY);
 		memDC.LineTo(graphRect.right, pixelY);
@@ -506,7 +506,7 @@ void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame)
 		label.Format(L"%.0f", amp);
 		memDC.TextOutW(graphRect.left - 45, pixelY - 8, label);
 	}
-	
+
 	// Рисуем график
 	CPen graphPen(PS_SOLID, 2, RGB(0, 0, 255));
 	memDC.SelectObject(&graphPen);
@@ -520,6 +520,10 @@ void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame)
 
 		int pixelY = graphRect.bottom - static_cast<int>(
 			(data.amplitude - minAmp) / (maxAmp - minAmp) * graphRect.Height());
+
+		// Проверяем, чтобы точка не выходила за границы
+		pixelX = max(graphRect.left, min(graphRect.right, pixelX));
+		pixelY = max(graphRect.top, min(graphRect.bottom, pixelY));
 
 		if (!firstPoint) {
 			memDC.MoveTo(prevPoint.x, prevPoint.y);
