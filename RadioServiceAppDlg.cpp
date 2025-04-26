@@ -116,6 +116,16 @@ CRadioServiceAppDlg::device_data CRadioServiceAppDlg::getting_data(){
 	return dt;
 }
 
+CRadioServiceAppDlg::cur_time CRadioServiceAppDlg::get_cur_time(){
+	SYSTEMTIME st;
+	cur_time res;
+
+	GetLocalTime(&st);  // Получаем локальное время
+	sprintf(res.st,"%02d:%02d:%02d.%03d",
+		st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
+	return res;
+}
+
 void CRadioServiceAppDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
@@ -445,7 +455,8 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	//printf("m_frequencyData[78].amplitude :%f\n",	m_frequencyData[78].amplitude);
 	//Invalidate();
 	//calculate_fft(this);
-	//return;
+	printf("curr time: %s\n", get_cur_time().st);
+	return;
 
 #ifdef TESTING
 	reset_pipe(0x82);
@@ -483,6 +494,7 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	loops = ceilf((float)(dt.end_freq - dt.start_freq) / 2);
 	XferThread = AfxBeginThread(XferLoop, this);
 	GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("старт"));
+	//printf("we exit from OnBnClickedPusk()\n");
 #endif
 }
 

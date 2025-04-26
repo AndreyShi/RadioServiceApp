@@ -21,6 +21,11 @@ public:
 	};
 	device_data getting_data();
 
+	struct cur_time{
+		char st[13]; //14:25:36.423
+	};
+	cur_time get_cur_time();
+
 // Dialog Data
 	enum { IDD = IDD_RADIOSERVICEAPP_DIALOG };
 
