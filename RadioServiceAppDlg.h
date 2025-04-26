@@ -14,6 +14,11 @@ public:
 	bool bLooping;
 	int loops;
 	CRadioServiceAppDlg(CWnd* pParent = NULL);	// standard constructor
+	struct device_data{
+		UINT16 start_freq;
+		UINT16 end_freq;
+		UINT8 attenua;
+	};
 	device_data getting_data();
 
 // Dialog Data
@@ -23,6 +28,8 @@ public:
 	CPoint m_ScrollPos;    // Позиция прокрутки (в пикселях)
 	CSize m_TotalSize;     // Общий размер виртуального пространства
 	void UpdateScrollBars();
+
+
 
 	struct FrequencyData {
 		double frequency;

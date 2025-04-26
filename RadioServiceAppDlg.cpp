@@ -64,7 +64,7 @@ CRadioServiceAppDlg::CRadioServiceAppDlg(CWnd* pParent /*=NULL*/)
 25 dB - 0D
 30 dB - 03
 */
-device_data CRadioServiceAppDlg::getting_data(){
+CRadioServiceAppDlg::device_data CRadioServiceAppDlg::getting_data(){
 
 	device_data dt = { 0 };
 
@@ -441,10 +441,10 @@ void CRadioServiceAppDlg::OnBnClickedInitialization(){
 
 void CRadioServiceAppDlg::OnBnClickedPusk(){
 	//fft30_5[157]
-	m_frequencyData[78].amplitude = m_frequencyData[78].amplitude + 5.0F;
-	printf("m_frequencyData[78].amplitude :%f\n",	m_frequencyData[78].amplitude);
-	Invalidate();
-	return;
+	//m_frequencyData[78].amplitude = m_frequencyData[78].amplitude + 5.0F;
+	//printf("m_frequencyData[78].amplitude :%f\n",	m_frequencyData[78].amplitude);
+	//Invalidate();
+	//return;
 
 #ifdef TESTING
 	reset_pipe(0x82);
@@ -460,7 +460,7 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	device_data dt = getting_data();
 
 	SetupUsbOUT_settings(dt);
-	loops = ceilf((float)(dt.end_freq - dt.start_freq) / 20);
+	loops = ceilf((float)(dt.end_freq - dt.start_freq) / 2);
 	for (int i = 0; i < loops; i++){
 		UINT8 buf[1024] = { 0 };
 		read_usb_async(0x82, buf, 1024);

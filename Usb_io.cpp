@@ -257,7 +257,7 @@ void SetupUsbOUT_empty(void){
 	}
 }
 
-void SetupUsbOUT_settings(device_data dt){
+void SetupUsbOUT_settings(CRadioServiceAppDlg::device_data dt){
 
 	WINUSB_SETUP_PACKET wxb = { 0 };
 	wxb.RequestType = 0x40;   //byte
