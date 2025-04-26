@@ -358,15 +358,15 @@ BOOL CRadioServiceAppDlg::OnInitDialog()
 	p = fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
 	fftw_execute(p);
 
-	printf("FFTW работает!\n");
+	printf("FFTW works!\n");
 
 	fftw_destroy_plan(p);
 	fftw_free(in);
 	fftw_free(out);
 
-	m_dZoomFactor = 1.0;
-	m_ScrollPos = CPoint(0, 0);
-	m_TotalSize = CSize(800, 600); // Начальный размер виртуального пространства
+	//m_dZoomFactor = 1.0;
+	//m_ScrollPos = CPoint(0, 0);
+	//m_TotalSize = CSize(800, 600); // Начальный размер виртуального пространства
 	//UpdateScrollBars();
 	//calculate_fft(this);
 

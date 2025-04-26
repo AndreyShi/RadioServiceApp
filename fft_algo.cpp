@@ -12,7 +12,7 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 
 	// Проверяем, что данных достаточно для комплексных чисел (кратно 4)
 	if (byte_count % 4 != 0) {
-		fprintf(stderr, "Размер данных должен быть кратен 4 (int16 complex)\n");
+		fprintf(stderr, "The data size must be a multiple of 4 (int16 complex)\n");
 		free(byte_array);
 		return 1;
 	}
@@ -92,7 +92,7 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 	free(shifted_fft);
 	free(byte_array);
 
-	printf("Обработка завершена. Результаты сохранены в fft_results.csv\n");
+	printf("Processing complete. Results saved in fft_results.csv\n");
 	return 0;
 }
 
@@ -100,7 +100,7 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 size_t read_hex_file(const char* filename, uint8_t** data) {
 	FILE* file = fopen(filename, "rb");
 	if (!file) {
-		fprintf(stderr, "Не удалось открыть файл %s\n", filename);
+		fprintf(stderr, "Failed to open file %s\n", filename);
 		exit(1);
 	}
 
@@ -126,7 +126,7 @@ size_t read_hex_file(const char* filename, uint8_t** data) {
 
 	// Проверяем четное количество символов
 	if (content_len % 2 != 0) {
-		fprintf(stderr, "Нечетное количество hex-символов\n");
+		fprintf(stderr, "Odd number of hex characters\n");
 		free(content);
 		exit(1);
 	}

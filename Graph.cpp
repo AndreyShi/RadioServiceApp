@@ -443,7 +443,7 @@ void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame)
 
 	// Область графика с отступами
 	CRect graphRect = clientRect;
-	graphRect.DeflateRect(50, 40, 40, 50);
+    graphRect.DeflateRect(50, 40, 40, 50);
 
 	// Находим минимальные и максимальные значения
 	double minFreq = pDlgFrame->m_frequencyData.front().frequency;
@@ -491,7 +491,8 @@ void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame)
 			memDC.TextOutW(pixelX - 15, graphRect.bottom + 5, label);
 		}
 	}
-
+	
+	
 	// Горизонтальные линии сетки (каждые 10 dBm)
 	for (double amp = floor(minAmp / 10) * 10; amp <= maxAmp; amp += 10) {
 		int pixelY = graphRect.bottom - static_cast<int>(
@@ -505,7 +506,7 @@ void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame)
 		label.Format(L"%.0f", amp);
 		memDC.TextOutW(graphRect.left - 45, pixelY - 8, label);
 	}
-
+	
 	// Рисуем график
 	CPen graphPen(PS_SOLID, 2, RGB(0, 0, 255));
 	memDC.SelectObject(&graphPen);
@@ -535,17 +536,6 @@ void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame)
 	memDC.TextOutW(graphRect.left - 35, graphRect.top - 30, L"Амплитуда dBm");
 	memDC.TextOutW(graphRect.right - 55, graphRect.bottom + 20, L"Частота (МГц)");
 
-	// Для добавления маркеров точек данных
-	/*CBrush pointBrush(RGB(255, 0, 0));
-	memDC.SelectObject(&pointBrush);
-	for (const auto& data : pDlgFrame->m_frequencyData) {
-		int pixelX = graphRect.left + static_cast<int>(
-			(data.frequency - minFreq) / (maxFreq - minFreq) * graphRect.Width());
-		int pixelY = graphRect.bottom - static_cast<int>(
-			(data.amplitude - minAmp) / (maxAmp - minAmp) * graphRect.Height());
-		memDC.Ellipse(pixelX - 2, pixelY - 2, pixelX + 2, pixelY + 2);
-	}
-	*/
 	// 3. Копируем буфер на экран
 	pDC.BitBlt(0, 0, clientRect.Width(), clientRect.Height(),
 		&memDC, 0, 0, SRCCOPY);
