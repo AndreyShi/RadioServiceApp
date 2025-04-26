@@ -6,3 +6,6 @@ ipch
 *.opensdf
 #python virt env
 venv
+#other files
+fft_results.csv
+t.py
