@@ -3,7 +3,7 @@
 //
 
 #pragma once
-
+#define ID_TIMER_USB_RECIEVE_TIMEOUT_EXPIRES 100
 
 // CRadioServiceAppDlg dialog
 class CRadioServiceAppDlg : public CDialogEx
@@ -12,6 +12,9 @@ class CRadioServiceAppDlg : public CDialogEx
 public:
 	CWinThread *XferThread;
 	bool bLooping;
+	bool usb_timeout;
+	void StartUsbTimer();
+	void EndUsbTimer();
 	CRadioServiceAppDlg(CWnd* pParent = NULL);	// standard constructor
 	struct device_data{
 		UINT16 start_freq;
@@ -58,6 +61,7 @@ protected:
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	afx_msg void OnTimer(UINT_PTR nIdEvent);
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedCancel();

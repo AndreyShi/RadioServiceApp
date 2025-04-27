@@ -135,6 +135,7 @@ BEGIN_MESSAGE_MAP(CRadioServiceAppDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_SIZE()
+	ON_WM_TIMER()
 	//ON_WM_HSCROLL()
 	//ON_WM_VSCROLL()
 	//ON_WM_MOUSEWHEEL()
@@ -149,6 +150,28 @@ BEGIN_MESSAGE_MAP(CRadioServiceAppDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_Abort, &CRadioServiceAppDlg::OnBnClickedButtonAbort)
 END_MESSAGE_MAP()
 
+void CRadioServiceAppDlg::OnTimer(UINT_PTR nIdEvent){
+	if (nIdEvent == ID_TIMER_USB_RECIEVE_TIMEOUT_EXPIRES){
+		if (usb_timeout == TRUE){
+			printf("USB TIMEOUT\n");
+			usb_timeout = FALSE;
+		}
+	}
+	else{
+		printf("timer event:%d %s\n", nIdEvent, get_cur_time().st);
+	}
+
+	KillTimer(nIdEvent);
+}
+
+void CRadioServiceAppDlg::StartUsbTimer(){
+	usb_timeout = TRUE;
+	SetTimer(ID_TIMER_USB_RECIEVE_TIMEOUT_EXPIRES, 1000, NULL);
+}
+void CRadioServiceAppDlg::EndUsbTimer(){
+	usb_timeout = FALSE;
+	KillTimer(ID_TIMER_USB_RECIEVE_TIMEOUT_EXPIRES);
+}
 void CRadioServiceAppDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
@@ -318,6 +341,7 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	//Invalidate();
 	//calculate_fft(this);
 	//printf("curr time: %s\n", get_cur_time().st);
+	//SetTimer(2, 1000, NULL);
 	//return;
 
 #ifdef TESTING
@@ -345,7 +369,7 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	if (XferThread)
 	{
 		bLooping = false;
-		GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("стоп"));
+		GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("старт"));
 		return;
 	}
 	SetupUsbOUT_init();
@@ -354,7 +378,7 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 
 	bLooping = true;
 	XferThread = AfxBeginThread(XferLoop, this);
-	GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("старт"));
+	GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("стоп"));
 	//printf("we exit from OnBnClickedPusk()\n");
 #endif
 }

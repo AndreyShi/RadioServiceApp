@@ -300,7 +300,7 @@ serviced and the app will loop indefinitely.
 
 The "Start" button on click handler just calls this routine, passing a pointer
 to the dialog (main window) object.  That way, this routine has access to all
-the public members of the CBulkLoopDlg class.
+the public members of the CRadioServiceAppDlg class.
 */
 
 UINT XferLoop(LPVOID params) {
@@ -311,7 +311,7 @@ UINT XferLoop(LPVOID params) {
 	printf("start XferLoop, packets: %d %s\n", loops, dlg->get_cur_time().st);
 	for (int i = 0; dlg->bLooping && i < loops; i++) {
 		UCHAR buf[1024] = { 0 };
-		usbbytescount += read_usb_sync(0x82, buf, 1024);
+		usbbytescount += read_usb_async(0x82, buf, 1024);
 	}
 	printf("end XferLoop %s\n", dlg->get_cur_time().st);
 	dlg->XferThread = NULL;
@@ -361,7 +361,7 @@ ULONG read_usb_sync(UINT8 pipeId, UINT8* buf, int max_cnt){
 	return recieved;
 }
 
-void read_usb_async(UINT8 pipeId, UINT8* buf, int max_cnt) {
+ULONG read_usb_async(UINT8 pipeId, UINT8* buf, int max_cnt) {
 
 	ULONG recieved = 0;
 	DWORD res_wait;
@@ -404,4 +404,5 @@ void read_usb_async(UINT8 pipeId, UINT8* buf, int max_cnt) {
 		}
 		CloseHandle(over.hEvent);
 	}
+	return recieved;
 }
