@@ -126,6 +126,31 @@ CRadioServiceAppDlg::cur_time CRadioServiceAppDlg::get_cur_time(){
 	return res;
 }
 
+void CRadioServiceAppDlg::save_hex_buffer_to_file(const unsigned char *buffer, size_t buffer_size, const char *filename) {
+	FILE *file = fopen(filename, "w");
+	if (file == NULL) {
+		perror("Failed to open file");
+		return;
+	}
+
+	for (size_t i = 0; i < buffer_size; i++) {
+		// Печатаем байт в HEX формате с ведущим нулём
+		fprintf(file, "%02x", buffer[i]);
+
+		// Добавляем пробел после каждого байта, кроме последнего в строке
+		if ((i + 1) % 16 != 0 && i + 1 != buffer_size) {
+			fputc(' ', file);
+		}
+
+		// Переход на новую строку после каждых 16 байтов
+		if ((i + 1) % 16 == 0 && i + 1 != buffer_size) {
+			fputc('\n', file);
+		}
+	}
+
+	fclose(file);
+}
+
 void CRadioServiceAppDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
@@ -311,7 +336,13 @@ void CRadioServiceAppDlg::OnPaint()
 		//GraphHandlerSin(this);
 		//GraphHandlerSinDoubleBuffer(this);
 		//GraphHandlerSinDoubleBufferScroll(this);
-		GraphHandler_fft(this);
+		if (XferThread)
+		{
+			printf("XferThread still work\n");
+			CDialogEx::OnPaint();
+		}
+		else
+		    { GraphHandler_fft(this);}
 	}
 }
 
@@ -342,6 +373,15 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	//calculate_fft(this);
 	//printf("curr time: %s\n", get_cur_time().st);
 	//SetTimer(2, 1000, NULL);
+	// Пример буфера (0x00 до 0xFF)
+	//unsigned char buffer[256];
+	//for (int i = 0; i < 256; i++) {
+	//	buffer[i] = (unsigned char)i;
+	//}
+
+	 //Сохраняем в файл
+	//save_hex_buffer_to_file(buffer, sizeof(buffer), "output.txt");
+	//printf("File saved successfully.\n");
 	//return;
 
 #ifdef TESTING

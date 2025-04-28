@@ -24,11 +24,15 @@ public:
 	device_data getting_data();
 	device_data dt;
 	uint8_t* ptr_usb_data;
+	size_t usbbytescount;
+
+	const wchar_t* p_str = L"старт";
 
 	struct cur_time{
 		char st[13]; //14:25:36.423
 	};
 	cur_time get_cur_time();
+	void save_hex_buffer_to_file(const unsigned char *buffer, size_t buffer_size, const char *filename);
 
 // Dialog Data
 	enum { IDD = IDD_RADIOSERVICEAPP_DIALOG };

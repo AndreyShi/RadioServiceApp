@@ -417,7 +417,7 @@ void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame)
 	pDlgFrame->GetClientRect(&clientRect);
 
 	if (pDlgFrame->m_frequencyData.empty()) {
-		printf("m_frequencyData is empty, load 30_5 data\n");
+		printf("m_frequencyData is empty, load 30_5.txt data\n");
 		for (int i = 0; i < 512; i += 2){
 			CRadioServiceAppDlg::FrequencyData data;
 			data.frequency = fft30_5[i];

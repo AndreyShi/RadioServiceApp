@@ -9,9 +9,27 @@ static size_t read_hex_file(const char* filename, uint8_t** data);
 int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 	uint8_t* byte_array = NULL;
 	size_t byte_count = 0;
+	double f_start = F_START;
+	double f_end = F_END;
 	if (pDlgFrame->ptr_usb_data == NULL)
 	{
 		byte_count = read_hex_file("30_5.txt", &byte_array);
+	}
+	else{
+		byte_count = pDlgFrame->usbbytescount;
+		f_start = pDlgFrame->dt.start_freq;
+		f_end = pDlgFrame->dt.end_freq;
+		byte_array = pDlgFrame->ptr_usb_data;
+	}
+
+	if (byte_array == NULL){
+		fprintf(stderr, "The data pointer is 0 \n");
+		return 1;
+	}
+	if (byte_count == 0){
+		fprintf(stderr, "The data size is 0 \n");
+		free(byte_array);
+		return 1;
 	}
 
 	// Проверяем, что данных достаточно для комплексных чисел (кратно 4)
@@ -79,7 +97,7 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 	fprintf(out_file, "Frequency(MHz),Amplitude(dBm)\n");
 
 	for (size_t i = 0; i < complex_count; i++) {
-		double freq = F_START + (F_END - F_START) * i / complex_count;
+		double freq = f_start + (f_end - f_start) * i / complex_count;
 		fprintf(out_file, "%f,%f\n", freq, shifted_fft[i]);
 		CRadioServiceAppDlg::FrequencyData data;
 		data.frequency = freq;
