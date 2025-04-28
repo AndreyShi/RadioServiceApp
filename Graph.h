@@ -4,6 +4,7 @@ Graph Output
 
 void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame);
 void GraphHandler_fft_zoom(CRadioServiceAppDlg* pDlgFrame);
+void GraphHandler_fft_zoom_mouse(CRadioServiceAppDlg* pDlgFrame);
 
 const double fft30_5[] = {
 30.000000, -98.724101,

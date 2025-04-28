@@ -27,6 +27,7 @@ public:
 	size_t usbbytescount;
 
 	const wchar_t* p_str = L"старт";
+	bool m_lastMouseInGraph; // Был ли курсор в области графика в предыдущий раз
 
 	struct cur_time{
 		char st[13]; //14:25:36.423

@@ -164,7 +164,7 @@ BEGIN_MESSAGE_MAP(CRadioServiceAppDlg, CDialogEx)
 	ON_WM_MOUSEWHEEL()
 	//ON_WM_LBUTTONDOWN()
 	//ON_WM_LBUTTONUP()
-	//ON_WM_MOUSEMOVE()
+	ON_WM_MOUSEMOVE()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDCANCEL,  &CRadioServiceAppDlg::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_INIT, &CRadioServiceAppDlg::OnBnClickedInitialization)
@@ -234,7 +234,17 @@ BOOL CRadioServiceAppDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 		{
 			m_visibleMinFreq = newMinFreq;
 			m_visibleMaxFreq = newMaxFreq;
-			Invalidate();
+
+			CRect clientRect;
+			GetClientRect(&clientRect);
+			CRect graphRect = clientRect;
+			graphRect.DeflateRect(10, 10, 10,10);
+
+			CRect updateRect = graphRect;
+			updateRect.InflateRect(20, 15); // Небольшой запас для маркера и текста
+			InvalidateRect(updateRect, FALSE);
+
+			//Invalidate();
 		}
 	}
 
@@ -254,6 +264,29 @@ void CRadioServiceAppDlg::OnLButtonUp(UINT nFlags, CPoint point)
 void CRadioServiceAppDlg::OnMouseMove(UINT nFlags, CPoint point)
 {
 	CDialogEx::OnMouseMove(nFlags, point);
+
+	CRect clientRect;
+	GetClientRect(&clientRect);
+	CRect graphRect = clientRect;
+	graphRect.DeflateRect(50, 40, 40, 50);
+
+	// Перерисовываем только если курсор в области графика
+	if (graphRect.PtInRect(point))
+	{
+		// Перерисовываем только область графика
+		CRect updateRect = graphRect;
+		updateRect.InflateRect(20, 15); // Небольшой запас для маркера и текста
+		InvalidateRect(updateRect, FALSE);
+	}
+	else if (m_lastMouseInGraph)
+	{
+		// Если курсор вышел из области графика, перерисовываем чтобы убрать маркер
+		CRect updateRect = graphRect;
+		updateRect.InflateRect(20, 20);
+		InvalidateRect(updateRect, FALSE);
+	}
+
+	m_lastMouseInGraph = graphRect.PtInRect(point);
 }
 
 void CRadioServiceAppDlg::OnTimer(UINT_PTR nIdEvent){
@@ -414,7 +447,7 @@ void CRadioServiceAppDlg::OnPaint()
 			CDialogEx::OnPaint();
 		}
 		else
-		    { GraphHandler_fft_zoom(this);}
+		    { GraphHandler_fft_zoom_mouse(this);}
 	}
 }
 
