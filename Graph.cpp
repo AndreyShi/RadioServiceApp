@@ -472,15 +472,9 @@ void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame)
 	memDC.SelectObject(&gridPen);
 
 	// Вертикальные линии сетки (каждые 0.1 МГц)
-	for (double freq = minFreq; freq <= maxFreq; freq += 0.1) {
+	for (double freq = minFreq; freq <= ceil(maxFreq) + 0.1F; freq += 0.1) {
 		int pixelX = graphRect.left + static_cast<int>(
 			(freq - minFreq) / (maxFreq - minFreq) * graphRect.Width());
-
-		// Проверяем, чтобы линия не выходила за границы
-		if (pixelX < graphRect.left || pixelX > graphRect.right) continue;
-
-		memDC.MoveTo(pixelX, graphRect.bottom);
-		memDC.LineTo(pixelX, graphRect.top);
 
 		// Подписи на оси X (каждые 0.5 МГц)
 		if (fmod(freq, 0.5) < 0.01) {
@@ -488,7 +482,14 @@ void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame)
 			label.Format(L"%.1f", freq);
 			memDC.TextOutW(pixelX - 15, graphRect.bottom + 5, label);
 		}
+
+		// Проверяем, чтобы линия не выходила за границы
+		if (pixelX <= graphRect.left || pixelX > graphRect.right) continue;
+
+		memDC.MoveTo(pixelX, graphRect.bottom);
+		memDC.LineTo(pixelX, graphRect.top);
 	}
+	
 
 	// Горизонтальные линии сетки (каждые 10 dBm)
 	for (double amp = floor(minAmp / 10) * 10; amp <= maxAmp; amp += 10) {
