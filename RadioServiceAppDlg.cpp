@@ -161,7 +161,7 @@ BEGIN_MESSAGE_MAP(CRadioServiceAppDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_SIZE()
 	ON_WM_TIMER()
-	//ON_WM_MOUSEWHEEL()
+	ON_WM_MOUSEWHEEL()
 	//ON_WM_LBUTTONDOWN()
 	//ON_WM_LBUTTONUP()
 	//ON_WM_MOUSEMOVE()
@@ -176,9 +176,68 @@ BEGIN_MESSAGE_MAP(CRadioServiceAppDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_Abort, &CRadioServiceAppDlg::OnBnClickedButtonAbort)
 END_MESSAGE_MAP()
 
-// Обработчики событий для масштабирования и перемещения (добавить в класс диалога)
 BOOL CRadioServiceAppDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
+	ScreenToClient(&pt);
+
+	CRect clientRect;
+	GetClientRect(&clientRect);
+	CRect graphRect = clientRect;
+	graphRect.DeflateRect(50, 40, 40, 50);
+
+	if (graphRect.PtInRect(pt))
+	{
+		const double fullRange = m_frequencyData.back().frequency - m_frequencyData.front().frequency;
+		const double MIN_ZOOM_RANGE = 0.1;
+		const double MAX_ZOOM_RANGE = fullRange;
+		const double EPSILON = 1e-6; // Допустимая погрешность сравнения
+
+		double currentRange = m_visibleMaxFreq - m_visibleMinFreq;
+		bool zoomIn = (zDelta > 0);
+
+		// Вычисляем новый диапазон
+		double newRange;
+		if (zoomIn) {
+			newRange = currentRange * 0.8;
+			if (newRange < MIN_ZOOM_RANGE - EPSILON) {
+				newRange = MIN_ZOOM_RANGE;
+			}
+		}
+		else {
+			newRange = currentRange * 1.25;
+			if (newRange > MAX_ZOOM_RANGE + EPSILON) {
+				newRange = MAX_ZOOM_RANGE;
+			}
+		}
+
+		// Вычисляем частоту под курсором
+		double cursorFreq = m_visibleMinFreq + (pt.x - graphRect.left) * currentRange / graphRect.Width();
+
+		// Вычисляем новые границы
+		double newMinFreq = cursorFreq - (cursorFreq - m_visibleMinFreq) * (newRange / currentRange);
+		double newMaxFreq = newMinFreq + newRange;
+
+		// Корректируем границы
+		if (newMinFreq < m_frequencyData.front().frequency - EPSILON) {
+			newMinFreq = m_frequencyData.front().frequency;
+			newMaxFreq = newMinFreq + newRange;
+		}
+		else if (newMaxFreq > m_frequencyData.back().frequency + EPSILON) {
+			newMaxFreq = m_frequencyData.back().frequency;
+			newMinFreq = newMaxFreq - newRange;
+		}
+
+		// Проверяем, изменился ли диапазон (с учетом погрешности)
+		if (fabs(newRange - currentRange) > EPSILON ||
+			fabs(newMinFreq - m_visibleMinFreq) > EPSILON ||
+			fabs(newMaxFreq - m_visibleMaxFreq) > EPSILON)
+		{
+			m_visibleMinFreq = newMinFreq;
+			m_visibleMaxFreq = newMaxFreq;
+			Invalidate();
+		}
+	}
+
 	return CDialogEx::OnMouseWheel(nFlags, zDelta, pt);
 }
 
@@ -355,7 +414,7 @@ void CRadioServiceAppDlg::OnPaint()
 			CDialogEx::OnPaint();
 		}
 		else
-		    { GraphHandler_fft(this);}
+		    { GraphHandler_fft_zoom(this);}
 	}
 }
 

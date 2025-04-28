@@ -37,11 +37,8 @@ public:
 // Dialog Data
 	enum { IDD = IDD_RADIOSERVICEAPP_DIALOG };
 
-	double m_zoomFactor = 1.0;      // Фактор масштабирования
-	double m_offsetX = 0.0;         // Смещение по оси X
-	double m_offsetY = 0.0;         // Смещение по оси Y
-	CPoint m_lastMousePos;          // Для перемещения графика
-	bool m_isDragging = false;      // Флаг перемещения графика
+	double m_visibleMinFreq;  // Минимальная частота видимого диапазона
+	double m_visibleMaxFreq;  // Максимальная частота видимого диапазона
 
 
 
