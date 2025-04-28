@@ -37,10 +37,11 @@ public:
 // Dialog Data
 	enum { IDD = IDD_RADIOSERVICEAPP_DIALOG };
 
-	double m_dZoomFactor;  // Коэффициент масштабирования
-	CPoint m_ScrollPos;    // Позиция прокрутки (в пикселях)
-	CSize m_TotalSize;     // Общий размер виртуального пространства
-	void UpdateScrollBars();
+	double m_zoomFactor = 1.0;      // Фактор масштабирования
+	double m_offsetX = 0.0;         // Смещение по оси X
+	double m_offsetY = 0.0;         // Смещение по оси Y
+	CPoint m_lastMousePos;          // Для перемещения графика
+	bool m_isDragging = false;      // Флаг перемещения графика
 
 
 
@@ -65,6 +66,9 @@ protected:
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnTimer(UINT_PTR nIdEvent);
 	DECLARE_MESSAGE_MAP()
 public:

@@ -1,15 +1,9 @@
 /*
 Graph Output
 */
-void GraphHandler(CRadioServiceAppDlg* pDlgFrame);
-
-void GraphHandlerSin(CRadioServiceAppDlg* pDlgFrame);
-
-void GraphHandlerSinDoubleBuffer(CRadioServiceAppDlg* pDlgFrame);
-
-void GraphHandlerSinDoubleBufferScroll(CRadioServiceAppDlg* pDlgFrame);
 
 void GraphHandler_fft(CRadioServiceAppDlg* pDlgFrame);
+void GraphHandler_fft_zoom(CRadioServiceAppDlg* pDlgFrame);
 
 const double fft30_5[] = {
 30.000000, -98.724101,

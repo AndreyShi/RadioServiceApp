@@ -161,9 +161,10 @@ BEGIN_MESSAGE_MAP(CRadioServiceAppDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_SIZE()
 	ON_WM_TIMER()
-	//ON_WM_HSCROLL()
-	//ON_WM_VSCROLL()
 	//ON_WM_MOUSEWHEEL()
+	//ON_WM_LBUTTONDOWN()
+	//ON_WM_LBUTTONUP()
+	//ON_WM_MOUSEMOVE()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDCANCEL,  &CRadioServiceAppDlg::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_INIT, &CRadioServiceAppDlg::OnBnClickedInitialization)
@@ -174,6 +175,27 @@ BEGIN_MESSAGE_MAP(CRadioServiceAppDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_READ_ASYNC, &CRadioServiceAppDlg::OnBnClickedButtonReadAsync)
 	ON_BN_CLICKED(IDC_BUTTON_Abort, &CRadioServiceAppDlg::OnBnClickedButtonAbort)
 END_MESSAGE_MAP()
+
+// Обработчики событий для масштабирования и перемещения (добавить в класс диалога)
+BOOL CRadioServiceAppDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
+	return CDialogEx::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+void CRadioServiceAppDlg::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	CDialogEx::OnLButtonDown(nFlags, point);
+}
+
+void CRadioServiceAppDlg::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	CDialogEx::OnLButtonUp(nFlags, point);
+}
+
+void CRadioServiceAppDlg::OnMouseMove(UINT nFlags, CPoint point)
+{
+	CDialogEx::OnMouseMove(nFlags, point);
+}
 
 void CRadioServiceAppDlg::OnTimer(UINT_PTR nIdEvent){
 	if (nIdEvent == ID_TIMER_USB_RECIEVE_TIMEOUT_EXPIRES){
@@ -205,11 +227,6 @@ void CRadioServiceAppDlg::OnSize(UINT nType, int cx, int cy)
 }
 // CRadioServiceAppDlg message handlers
 
-void CRadioServiceAppDlg::UpdateScrollBars()
-{
-
-}
-
 void CRadioServiceAppDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
@@ -220,10 +237,6 @@ void CRadioServiceAppDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScroll
 	CDialogEx::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
-BOOL CRadioServiceAppDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-{
-	return CDialogEx::OnMouseWheel(nFlags, zDelta, pt);
-}
 
 
 BOOL CRadioServiceAppDlg::OnInitDialog()
