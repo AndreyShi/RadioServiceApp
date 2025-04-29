@@ -98,7 +98,7 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 
 	for (size_t i = 0; i < complex_count; i++) {
 		double freq = f_start + (f_end - f_start) * i / complex_count;
-		fprintf(out_file, "%f,%f\n", freq, shifted_fft[i]);
+		fprintf(out_file, "%f,%f,\n", freq, shifted_fft[i]);
 		CRadioServiceAppDlg::FrequencyData data;
 		data.frequency = freq;
 		data.amplitude = shifted_fft[i];

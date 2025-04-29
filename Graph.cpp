@@ -350,13 +350,29 @@ void GraphHandler_fft_zoom_mouse(CRadioServiceAppDlg* pDlgFrame)
 	CPen gridPen(PS_DOT, 1, RGB(200, 200, 200));
 	memDC.SelectObject(&gridPen);
 
+	//изменяемое кол -во отображаемых значение по x
+	int div = 5;
+	int res = (int)pDlgFrame->m_visibleMaxFreq * 10 - (int)pDlgFrame->m_visibleMinFreq * 10;
+	if (res > 850)
+	    { div = 50;}
+	else if (res > 650)
+	    { div = 40;}
+	else if (res > 450)
+	    { div = 30;}
+	else if (res > 200)
+	    { div = 20;}
+	else if (res > 100)
+	    { div = 10;}
+
+	//printf("res: %d  div: %d\n", res, div);
+
 	// Вертикальные линии сетки (каждые 0.1 МГц)
 	for (double freq = floor(pDlgFrame->m_visibleMinFreq * 10) / 10; freq <= ceil(pDlgFrame->m_visibleMaxFreq) + 0.1F; freq += 0.1) {
 		int pixelX = graphRect.left + static_cast<int>(
 			(freq - pDlgFrame->m_visibleMinFreq) / (pDlgFrame->m_visibleMaxFreq - pDlgFrame->m_visibleMinFreq) * graphRect.Width());
 
 		// Подписи на оси X (каждые 0.5 МГц)
-		if (fmod(freq, 0.5) < 0.01) {
+		if (int(freq * 10) % div == 0){
 			CString label;
 			label.Format(L"%.1f", freq);
 			memDC.TextOutW(pixelX - 15, graphRect.bottom + 5, label);

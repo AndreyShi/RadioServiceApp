@@ -487,6 +487,9 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	 //Сохраняем в файл
 	//save_hex_buffer_to_file(buffer, sizeof(buffer), "output.txt");
 	//printf("File saved successfully.\n");
+	//m_frequencyData.clear();// очистка буфера
+	//calculate_fft(this);
+	//Invalidate();
 	//return;
 
 #ifdef TESTING
