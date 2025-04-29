@@ -443,7 +443,7 @@ void CRadioServiceAppDlg::OnPaint()
 		//GraphHandlerSinDoubleBufferScroll(this);
 		if (XferThread)
 		{
-			printf("XferThread still work\n");
+			//printf("XferThread still work\n");
 			CDialogEx::OnPaint();
 		}
 		else
@@ -475,6 +475,7 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	//m_frequencyData[78].amplitude = m_frequencyData[78].amplitude + 5.0F;
 	//printf("m_frequencyData[78].amplitude :%f\n",	m_frequencyData[78].amplitude);
 	//Invalidate();
+	//return;
 	//calculate_fft(this);
 	//printf("curr time: %s\n", get_cur_time().st);
 	//SetTimer(2, 1000, NULL);
@@ -522,7 +523,7 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	}
 	SetupUsbOUT_init();
 	dt = getting_data();
-	SetupUsbOUT_settings(dt);
+	//SetupUsbOUT_settings(dt);
 
 	bLooping = true;
 	XferThread = AfxBeginThread(XferLoop, this);

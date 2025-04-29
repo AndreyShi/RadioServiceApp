@@ -306,35 +306,41 @@ the public members of the CRadioServiceAppDlg class.
 UINT XferLoop(LPVOID params) {
 
 	CRadioServiceAppDlg *dlg = (CRadioServiceAppDlg *)params;
-	int loops = ceilf((float)(dlg->dt.end_freq - dlg->dt.start_freq) / 2);
+	while (dlg->bLooping){
+		SetupUsbOUT_settings(dlg->dt);
+		int loops = ceilf((float)(dlg->dt.end_freq - dlg->dt.start_freq) / 2);
 
-	dlg->ptr_usb_data = (uint8_t*)calloc(1024 * loops, sizeof(uint8_t));
+		dlg->ptr_usb_data = (uint8_t*)calloc(1024 * loops, sizeof(uint8_t));
 
-	dlg->usbbytescount = 0;
-	printf("start XferLoop, packets will recieve: %d %s\n", loops, dlg->get_cur_time().st);
-	for (int i = 0; dlg->bLooping && i < loops; i++) {
-		//UCHAR buf[1024] = { 0 };
-		dlg->usbbytescount += read_usb_async(0x82, &dlg->ptr_usb_data[dlg->usbbytescount], 1024);
+		dlg->usbbytescount = 0;
+		printf("start XferLoop, packets will recieve: %d %s\n", loops, dlg->get_cur_time().st);
+		for (int i = 0; i < loops; i++) {
+			//UCHAR buf[1024] = { 0 };
+			dlg->usbbytescount += read_usb_async(0x82, &dlg->ptr_usb_data[dlg->usbbytescount], 1024);
+			if (dlg->usbbytescount == 0 && dlg->bLooping == 0)
+			    { break;}
+		}
+		printf("end XferLoop ,bytes recv %d %s\n", dlg->usbbytescount, dlg->get_cur_time().st);
+
+		printf("save bin data to output.txt start %s\n", dlg->get_cur_time().st);
+		dlg->save_hex_buffer_to_file(dlg->ptr_usb_data, dlg->usbbytescount, "output.txt");
+		printf("save bin data finish %s\n", dlg->get_cur_time().st);
+
+		dlg->m_frequencyData.clear();// очистка буфера
+
+		printf("calculate fft start %s\n", dlg->get_cur_time().st);
+		calculate_fft(dlg);          // рассчет и запись в буфер
+		printf("calculate fft finish %s\n", dlg->get_cur_time().st);
+
+		printf("updating graph\n", dlg->get_cur_time().st);
+		dlg->Invalidate();           // обновление графика
+
+		// все данные сохранены в m_frequencyData, буфер удаляет в функции calculate_fft
+		//free(dlg->ptr_usb_data);     
+		dlg->ptr_usb_data = NULL;
+		dlg->usbbytescount = 0;
 	}
-	printf("end XferLoop ,bytes recv %d %s\n",dlg->usbbytescount, dlg->get_cur_time().st);
 
-	printf("save bin data to output.txt start %s\n", dlg->get_cur_time().st);
-	dlg->save_hex_buffer_to_file(dlg->ptr_usb_data, dlg->usbbytescount, "output.txt");
-	printf("save bin data finish %s\n", dlg->get_cur_time().st);
-
-	dlg->m_frequencyData.clear();// очистка буфера
-
-	printf("calculate fft start %s\n", dlg->get_cur_time().st);
-	calculate_fft(dlg);          // рассчет и запись в буфер
-	printf("calculate fft finish %s\n", dlg->get_cur_time().st);
-
-	printf("updating graph\n", dlg->get_cur_time().st);
-	dlg->Invalidate();           // обновление графика
-
-	// все данные сохранены в m_frequencyData, буфер удаляет в функции calculate_fft
-	//free(dlg->ptr_usb_data);     
-	dlg->ptr_usb_data = NULL;
-	dlg->usbbytescount = 0;
 	dlg->XferThread = NULL;
 	dlg->GetDlgItem(IDC_PUSK)->SetWindowTextW(dlg->p_str);
 	return true;
