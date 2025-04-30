@@ -54,6 +54,7 @@ CRadioServiceAppDlg::CRadioServiceAppDlg(CWnd* pParent /*=NULL*/)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	ptr_usb_data = NULL;
+	data_is_processing = 0;
 }
 /*
 0 dB - 3F
@@ -178,6 +179,7 @@ END_MESSAGE_MAP()
 
 BOOL CRadioServiceAppDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
+
 	ScreenToClient(&pt);
 
 	CRect clientRect;
@@ -185,7 +187,7 @@ BOOL CRadioServiceAppDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	CRect graphRect = clientRect;
 	graphRect.DeflateRect(50, 40, 40, 50);
 
-	if (graphRect.PtInRect(pt))
+	if (graphRect.PtInRect(pt) && data_is_processing == FALSE)
 	{
 		const double fullRange = m_frequencyData.back().frequency - m_frequencyData.front().frequency;
 		const double MIN_ZOOM_RANGE = 0.1;
@@ -242,12 +244,14 @@ BOOL CRadioServiceAppDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 			CRect updateRect = graphRect;
 			updateRect.InflateRect(20, 15); // Ќебольшой запас дл€ маркера и текста
-			InvalidateRect(updateRect, FALSE);
+			if (XferThread == NULL)
+			{
+				InvalidateRect(updateRect, FALSE);
+			}
 
 			//Invalidate();
 		}
 	}
-
 	return CDialogEx::OnMouseWheel(nFlags, zDelta, pt);
 }
 
@@ -265,6 +269,7 @@ void CRadioServiceAppDlg::OnMouseMove(UINT nFlags, CPoint point)
 {
 	CDialogEx::OnMouseMove(nFlags, point);
 
+
 	CRect clientRect;
 	GetClientRect(&clientRect);
 	CRect graphRect = clientRect;
@@ -276,14 +281,20 @@ void CRadioServiceAppDlg::OnMouseMove(UINT nFlags, CPoint point)
 		// ѕерерисовываем только область графика
 		CRect updateRect = graphRect;
 		updateRect.InflateRect(20, 15); // Ќебольшой запас дл€ маркера и текста
-		InvalidateRect(updateRect, FALSE);
+		if (XferThread == NULL)
+		{
+			InvalidateRect(updateRect, FALSE);
+		}
 	}
 	else if (m_lastMouseInGraph)
 	{
 		// ≈сли курсор вышел из области графика, перерисовываем чтобы убрать маркер
 		CRect updateRect = graphRect;
 		updateRect.InflateRect(20, 20);
-		InvalidateRect(updateRect, FALSE);
+		if (XferThread == NULL)
+		{
+			InvalidateRect(updateRect, FALSE);
+		}
 	}
 
 	m_lastMouseInGraph = graphRect.PtInRect(point);
@@ -314,7 +325,9 @@ void CRadioServiceAppDlg::EndUsbTimer(){
 void CRadioServiceAppDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
-	Invalidate();  // ѕринудительна€ перерисовка при изменении размера
+	Invalidate();
+	//printf("%d  %d\n", cx, cy);
+	  // ѕринудительна€ перерисовка при изменении размера
 	//UpdateScrollBars();
 }
 // CRadioServiceAppDlg message handlers
@@ -368,8 +381,8 @@ BOOL CRadioServiceAppDlg::OnInitDialog()
 	GetDlgItem(IDC_INIT)->ShowWindow(FALSE);
 	CreateConsole();
 	InitUsb();
-	GetDlgItem(IDC_START_FREQ)->SetWindowTextW(_T("580"));
-	GetDlgItem(IDC_END_FREQ)->SetWindowTextW(_T("750"));
+	GetDlgItem(IDC_START_FREQ)->SetWindowTextW(_T("30"));
+	GetDlgItem(IDC_END_FREQ)->SetWindowTextW(_T("32"));
 	((CComboBox*)GetDlgItem(IDC_COMBO_ATTENU))->SelectString(0,_T("0 dB"));
 	XferThread = NULL;
 
@@ -441,13 +454,16 @@ void CRadioServiceAppDlg::OnPaint()
 		//GraphHandlerSin(this);
 		//GraphHandlerSinDoubleBuffer(this);
 		//GraphHandlerSinDoubleBufferScroll(this);
-		if (XferThread)
+		if (data_is_processing == 1)
 		{
 			//printf("XferThread still work\n");
 			CDialogEx::OnPaint();
 		}
 		else
-		    { GraphHandler_fft_zoom_mouse(this);}
+		    { 
+			//m_frequencyData_display = m_frequencyData;
+			GraphHandler_fft_zoom_mouse(this);
+		    }
 	}
 }
 

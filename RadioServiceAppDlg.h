@@ -25,6 +25,7 @@ public:
 	device_data dt;
 	uint8_t* ptr_usb_data;
 	size_t usbbytescount;
+	bool data_is_processing;
 
 	const wchar_t* p_str = L"старт";
 	bool m_lastMouseInGraph; // Был ли курсор в области графика в предыдущий раз
@@ -48,6 +49,7 @@ public:
 		double amplitude;
 	};
 	std::vector<FrequencyData> m_frequencyData;
+	std::vector<FrequencyData> m_frequencyData_display;
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
