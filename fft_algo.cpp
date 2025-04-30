@@ -95,18 +95,6 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 	*/
 	FILE* out_file = fopen("fft_results.csv", "w");
 	fprintf(out_file, "Frequency(MHz),Amplitude(dBm)\n");
-	if (pDlgFrame->m_frequencyData.empty()){
-		for (size_t i = 0; i < complex_count; i++) {
-			double freq = f_start + (f_end - f_start) * i / complex_count;
-			fprintf(out_file, "%f,%f,\n", freq, shifted_fft[i]);
-			CRadioServiceAppDlg::FrequencyData data;
-			data.frequency = freq;
-			data.amplitude = shifted_fft[i];
-
-			pDlgFrame->m_frequencyData.push_back(data);
-		}
-	}
-	else{
 		for (size_t i = 0; i < complex_count; i++) {
 			double freq = f_start + (f_end - f_start) * i / complex_count;
 			fprintf(out_file, "%f,%f,\n", freq, shifted_fft[i]);
@@ -122,7 +110,6 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 				pDlgFrame->m_frequencyData.push_back(data);
 			}
 		}
-	}
 
 	fclose(out_file);
 
