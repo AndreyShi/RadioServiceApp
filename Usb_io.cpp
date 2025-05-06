@@ -314,14 +314,14 @@ UINT XferLoop(LPVOID params) {
 
 		dlg->usbbytescount = 0;
 		printf("start XferLoop, packets will recieve: %d %s\n", loops, dlg->get_cur_time().st);
-		//dlg->usbbytescount = read_hex_file("30_5.txt", &dlg->ptr_usb_data);
+		dlg->usbbytescount = read_hex_file("30_5.txt", &dlg->ptr_usb_data);
 		
-		for (int i = 0; i < loops; i++) {
-			//UCHAR buf[1024] = { 0 };
-			dlg->usbbytescount += read_usb_async(0x82, &dlg->ptr_usb_data[dlg->usbbytescount], 1024);
-			if (dlg->usbbytescount == 0 && dlg->bLooping == 0)
-			    { break;}
-		}
+		//for (int i = 0; i < loops; i++) {
+		//	//UCHAR buf[1024] = { 0 };
+		//	dlg->usbbytescount += read_usb_async(0x82, &dlg->ptr_usb_data[dlg->usbbytescount], 1024);
+		//	if (dlg->usbbytescount == 0 && dlg->bLooping == 0)
+		//	    { break;}
+		//}
 		
 		printf("end XferLoop ,bytes recv %d %s\n", dlg->usbbytescount, dlg->get_cur_time().st);
 

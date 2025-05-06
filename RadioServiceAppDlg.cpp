@@ -187,7 +187,7 @@ BOOL CRadioServiceAppDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	CRect graphRect = clientRect;
 	graphRect.DeflateRect(50, 40, 40, 50);
 
-	if (graphRect.PtInRect(pt) && data_is_processing == FALSE)
+	if (graphRect.PtInRect(pt))
 	{
 		const double fullRange = m_frequencyData.back().frequency - m_frequencyData.front().frequency;
 		const double MIN_ZOOM_RANGE = 0.1;
@@ -244,10 +244,7 @@ BOOL CRadioServiceAppDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 			CRect updateRect = graphRect;
 			updateRect.InflateRect(20, 15); // Небольшой запас для маркера и текста
-			if (XferThread == NULL)
-			{
-				InvalidateRect(updateRect, FALSE);
-			}
+			InvalidateRect(updateRect, FALSE);
 
 			//Invalidate();
 		}
@@ -281,20 +278,14 @@ void CRadioServiceAppDlg::OnMouseMove(UINT nFlags, CPoint point)
 		// Перерисовываем только область графика
 		CRect updateRect = graphRect;
 		updateRect.InflateRect(20, 15); // Небольшой запас для маркера и текста
-		if (XferThread == NULL)
-		{
-			InvalidateRect(updateRect, FALSE);
-		}
+		InvalidateRect(updateRect, FALSE);
 	}
 	else if (m_lastMouseInGraph)
 	{
 		// Если курсор вышел из области графика, перерисовываем чтобы убрать маркер
 		CRect updateRect = graphRect;
 		updateRect.InflateRect(20, 20);
-		if (XferThread == NULL)
-		{
-			InvalidateRect(updateRect, FALSE);
-		}
+		InvalidateRect(updateRect, FALSE);
 	}
 
 	m_lastMouseInGraph = graphRect.PtInRect(point);
