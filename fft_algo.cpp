@@ -90,6 +90,7 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 		}
 
 	//fclose(out_file);
+	//printf("Processing complete. Results saved in fft_results.csv\n");
 
 	// Освобождаем память
 	fftw_destroy_plan(plan);
@@ -99,7 +100,7 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 	free(shifted_fft);
 	free(byte_array);
 
-	printf("Processing complete. Results saved in fft_results.csv\n");
+
 	return 0;
 }
 

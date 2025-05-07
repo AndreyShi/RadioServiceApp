@@ -314,8 +314,8 @@ UINT XferLoop(LPVOID params) {
 
 		dlg->usbbytescount = 0;
 		printf("start XferLoop, packets will recieve: %d %s\n", loops, dlg->get_cur_time().st);
-#ifdef DEBUG_WITH_FILE
-		dlg->usbbytescount = read_hex_file("30_80.txt", &dlg->ptr_usb_data);
+#ifndef DEBUG_WITH_FILE
+		dlg->usbbytescount = read_hex_file("30_5.txt", &dlg->ptr_usb_data);
 #else		
 		for (int i = 0; i < loops; i++) {
 			dlg->usbbytescount += read_usb_async(0x82, &dlg->ptr_usb_data[dlg->usbbytescount], 1024);
