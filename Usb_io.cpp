@@ -314,15 +314,15 @@ UINT XferLoop(LPVOID params) {
 
 		dlg->usbbytescount = 0;
 		printf("start XferLoop, packets will recieve: %d %s\n", loops, dlg->get_cur_time().st);
-		dlg->usbbytescount = read_hex_file("30_5.txt", &dlg->ptr_usb_data);
-		
-		//for (int i = 0; i < loops; i++) {
-		//	//UCHAR buf[1024] = { 0 };
-		//	dlg->usbbytescount += read_usb_async(0x82, &dlg->ptr_usb_data[dlg->usbbytescount], 1024);
-		//	if (dlg->usbbytescount == 0 && dlg->bLooping == 0)
-		//	    { break;}
-		//}
-		
+#ifdef DEBUG_WITH_FILE
+		dlg->usbbytescount = read_hex_file("30_80.txt", &dlg->ptr_usb_data);
+#else		
+		for (int i = 0; i < loops; i++) {
+			dlg->usbbytescount += read_usb_async(0x82, &dlg->ptr_usb_data[dlg->usbbytescount], 1024);
+			if (dlg->usbbytescount == 0 && dlg->bLooping == 0)
+			    { break;}
+		}
+#endif		
 		printf("end XferLoop ,bytes recv %d %s\n", dlg->usbbytescount, dlg->get_cur_time().st);
 
 		printf("save bin data to output.txt start %s\n", dlg->get_cur_time().st);
