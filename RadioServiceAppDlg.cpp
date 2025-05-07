@@ -152,6 +152,19 @@ void CRadioServiceAppDlg::save_hex_buffer_to_file(const unsigned char *buffer, s
 	fclose(file);
 }
 
+void CRadioServiceAppDlg::update_graph_on_display(BOOL bErase){
+
+	CRect clientRect;
+	GetClientRect(&clientRect);
+	CRect graphRect = clientRect;
+	//50 40 40 50 only graph
+	graphRect.DeflateRect(0, 25, 0, 25);
+
+	// Перерисовываем только область графика
+	CRect updateRect = graphRect;
+	InvalidateRect(updateRect, bErase);
+}
+
 void CRadioServiceAppDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
@@ -234,19 +247,11 @@ BOOL CRadioServiceAppDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 			fabs(newMinFreq - m_visibleMinFreq) > EPSILON ||
 			fabs(newMaxFreq - m_visibleMaxFreq) > EPSILON)
 		{
+
 			m_visibleMinFreq = newMinFreq;
 			m_visibleMaxFreq = newMaxFreq;
-
-			CRect clientRect;
-			GetClientRect(&clientRect);
-			CRect graphRect = clientRect;
-			graphRect.DeflateRect(10, 10, 10,10);
-
-			CRect updateRect = graphRect;
-			updateRect.InflateRect(20, 15); // Небольшой запас для маркера и текста
-			InvalidateRect(updateRect, FALSE);
-
-			//Invalidate();
+			//printf("m_visibleMinFreq %f, m_visibleMaxFreq %f\n", m_visibleMinFreq, m_visibleMaxFreq);
+			update_graph_on_display(FALSE);
 		}
 	}
 	return CDialogEx::OnMouseWheel(nFlags, zDelta, pt);

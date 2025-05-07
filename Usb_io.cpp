@@ -336,7 +336,9 @@ UINT XferLoop(LPVOID params) {
 		printf("calculate fft finish %s\n", dlg->get_cur_time().st);
 		dlg->data_is_processing = 0;
 		printf("updating graph\n", dlg->get_cur_time().st);
-		dlg->Invalidate(0);           // обновление графика
+
+		//dlg->Invalidate(0);           // обновление графика
+		dlg->update_graph_on_display(FALSE);
 
 		// все данные сохранены в m_frequencyData, буфер удаляет в функции calculate_fft
 		//free(dlg->ptr_usb_data);     

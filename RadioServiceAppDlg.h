@@ -35,6 +35,7 @@ public:
 	};
 	cur_time get_cur_time();
 	void save_hex_buffer_to_file(const unsigned char *buffer, size_t buffer_size, const char *filename);
+	void update_graph_on_display(BOOL bErase);
 
 // Dialog Data
 	enum { IDD = IDD_RADIOSERVICEAPP_DIALOG };
