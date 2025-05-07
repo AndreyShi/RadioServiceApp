@@ -199,9 +199,10 @@ void CRadioServiceAppDlg::OnEnChangeEditStartFreq() {
 	GetDlgItem(IDC_START_FREQ)->GetWindowText(strValue);
 
 	int freq = _ttoi(strValue);
+	//printf("freq %d\n", freq);
 	if (freq < 30) {
 		GetDlgItem(IDC_START_FREQ)->SetWindowText(_T("30"));
-	}
+	}	
 }
 
 
@@ -210,9 +211,23 @@ void CRadioServiceAppDlg::OnEnChangeEditEndFreq() {
 	GetDlgItem(IDC_END_FREQ)->GetWindowText(strValue);
 
 	int freq = _ttoi(strValue);
+	//printf("freq %d\n", freq);
 	if (freq > 3000) {
 		GetDlgItem(IDC_END_FREQ)->SetWindowText(_T("3000"));
 	}
+	//ограничение относительно минимального
+	/*
+	CString strValue_min;
+	GetDlgItem(IDC_START_FREQ)->GetWindowText(strValue_min);
+	int freq_min = _ttoi(strValue_min);
+
+	if (freq < freq_min){
+		CString str;
+		str.Format(_T("%d"), freq_min + 2);
+		GetDlgItem(IDC_END_FREQ)->SetWindowText(str);
+	}
+	*/
+
 }
 
 BOOL CRadioServiceAppDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
