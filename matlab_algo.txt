@@ -1,0 +1,39 @@
+% === Путь к файлу ===
+filename = '30_5.txt';  % Заменить на имя файла
+
+% === Считывание текстовых hex-данных ===
+fid = fopen(filename, 'r');
+hexStr = fscanf(fid, '%s');
+fclose(fid);
+
+% === Разделим по байтам (по 2 символа) и преобразуем в uint8 ===
+hexBytes = reshape(hexStr, 2, []).';
+byteArray = uint8(hex2dec(hexBytes));
+
+% === Преобразуем в int16 (Little Endian) и формируем комплексные точки ===
+int16vals = typecast(byteArray, 'int16');
+realParts = int16vals(1:2:end);
+imagParts = int16vals(2:2:end);
+complexSignal = complex(double(realParts), double(imagParts));
+
+% === FFT и перевод в dBm ===
+fftResult = fftshift(fft(complexSignal));
+fftMag = abs(fftResult);
+fft_dBm = 20 * log10(fftMag + 1e-12);  % Добавим защиту от log(0)
+
+% === Частотная ось ===
+N = length(fft_dBm);
+f_start = 30;      % МГц
+f_end = 32;        % МГц
+freq = linspace(f_start, f_end, N);
+
+% === Нормировка: максимум = -54 dBm ===
+fft_dBm = fft_dBm - max(fft_dBm) - 54;
+
+% === Построение графика ===
+figure;
+plot(freq, fft_dBm, 'LineWidth', 1.5);
+xlabel('Частота (МГц)');
+ylabel('Амплитуда (dBm)');
+title('Спектр FFT (complex int16 LE)');
+grid on;
