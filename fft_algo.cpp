@@ -58,20 +58,11 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 	fftw_plan plan = fftw_plan_dft_1d(complex_count, signal, fft_result, FFTW_FORWARD, FFTW_ESTIMATE);
 	fftw_execute(plan);
 
-	// Вычисляем амплитуду и преобразуем в dBm
+	// Вычисление амплитуды и перевод в dBm
 	double* fft_dBm = (double*)malloc(complex_count * sizeof(double));
-	double max_val = -INFINITY;
-
-	for (size_t i = 0; i < complex_count; i++) {
-		double mag = sqrt(fft_result[i][0] * fft_result[i][0] +
-			fft_result[i][1] * fft_result[i][1]);
-		fft_dBm[i] = 20 * log10(mag + 1e-12);
-		if (fft_dBm[i] > max_val) max_val = fft_dBm[i];
-	}
-
-	// Нормировка
-	for (size_t i = 0; i < complex_count; i++) {
-		fft_dBm[i] = fft_dBm[i] - max_val + TARGET_PEAK;
+	for (int i = 0; i < complex_count; i++) {
+		double mag = hypot(fft_result[i][0], fft_result[i][1]) / complex_count;
+		fft_dBm[i] = 10 * log10(mag / 1e-8); // Защита от log(0)
 	}
 
 	// Сдвигаем спектр (fftshift)
@@ -79,25 +70,12 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 	memcpy(shifted_fft, fft_dBm + complex_count / 2, complex_count / 2 * sizeof(double));
 	memcpy(shifted_fft + complex_count / 2, fft_dBm, complex_count / 2 * sizeof(double));
 
-	// Сохраняем результаты в файл
-	/*
-	#read file in python and build graph
-	import pandas as pd
-	import matplotlib.pyplot as plt
 
-	df = pd.read_csv('fft_results.csv')
-	plt.plot(df['Frequency(MHz)'], df['Amplitude(dBm)'])
-	plt.xlabel('Frequency (MHz)')
-	plt.ylabel('Amplitude (dBm)')
-	plt.title('FFT Spectrum')
-	plt.grid(True)
-	plt.show()
-	*/
-	FILE* out_file = fopen("fft_results.csv", "w");
-	fprintf(out_file, "Frequency(MHz),Amplitude(dBm)\n");
+	//FILE* out_file = fopen("fft_results.csv", "w");
+	//fprintf(out_file, "Frequency(MHz),Amplitude(dBm)\n");
 		for (size_t i = 0; i < complex_count; i++) {
 			double freq = f_start + (f_end - f_start) * i / complex_count;
-			fprintf(out_file, "%f,%f,\n", freq, shifted_fft[i]);
+			//fprintf(out_file, "%f,%f,\n", freq, shifted_fft[i]);
 			CRadioServiceAppDlg::FrequencyData data;
 			data.frequency = freq;
 			data.amplitude = shifted_fft[i];
@@ -111,7 +89,7 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 			}
 		}
 
-	fclose(out_file);
+	//fclose(out_file);
 
 	// Освобождаем память
 	fftw_destroy_plan(plan);
