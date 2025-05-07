@@ -81,4 +81,6 @@ public:
 	afx_msg void OnBnClickedButtonReadSync();
 	afx_msg void OnBnClickedButtonReadAsync();
 	afx_msg void OnBnClickedButtonAbort();
+	afx_msg void OnEnChangeEditStartFreq();
+	afx_msg void OnEnChangeEditEndFreq();
 };

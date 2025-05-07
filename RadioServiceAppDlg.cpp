@@ -188,7 +188,32 @@ BEGIN_MESSAGE_MAP(CRadioServiceAppDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_READ_SYNC, &CRadioServiceAppDlg::OnBnClickedButtonReadSync)
 	ON_BN_CLICKED(IDC_BUTTON_READ_ASYNC, &CRadioServiceAppDlg::OnBnClickedButtonReadAsync)
 	ON_BN_CLICKED(IDC_BUTTON_Abort, &CRadioServiceAppDlg::OnBnClickedButtonAbort)
+	ON_EN_CHANGE(IDC_START_FREQ, &CRadioServiceAppDlg::OnEnChangeEditStartFreq)
+	ON_EN_CHANGE(IDC_END_FREQ, &CRadioServiceAppDlg::OnEnChangeEditEndFreq)
 END_MESSAGE_MAP()
+
+
+
+void CRadioServiceAppDlg::OnEnChangeEditStartFreq() {
+	CString strValue;
+	GetDlgItem(IDC_START_FREQ)->GetWindowText(strValue);
+
+	int freq = _ttoi(strValue);
+	if (freq < 30) {
+		GetDlgItem(IDC_START_FREQ)->SetWindowText(_T("30"));
+	}
+}
+
+
+void CRadioServiceAppDlg::OnEnChangeEditEndFreq() {
+	CString strValue;
+	GetDlgItem(IDC_END_FREQ)->GetWindowText(strValue);
+
+	int freq = _ttoi(strValue);
+	if (freq > 3000) {
+		GetDlgItem(IDC_END_FREQ)->SetWindowText(_T("3000"));
+	}
+}
 
 BOOL CRadioServiceAppDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
@@ -535,8 +560,6 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 	}
 	SetupUsbOUT_init();
 	dt = getting_data();
-	//SetupUsbOUT_settings(dt);
-
 	bLooping = true;
 	XferThread = AfxBeginThread(XferLoop, this);
 	GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("стоп"));
