@@ -9,3 +9,6 @@ venv
 #other files
 fft_results.csv
 t.py
+#debug files
+output.h
+output.txt
