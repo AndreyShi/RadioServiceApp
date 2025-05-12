@@ -437,6 +437,9 @@ BOOL CRadioServiceAppDlg::OnInitDialog()
 	fftw_destroy_plan(p);
 	fftw_free(in);
 	fftw_free(out);
+#ifdef DEBUG_WITH_FILE
+	SetWindowTextW(_T("DEBUG_WITH_FILE"));
+#endif
 
 	//m_dZoomFactor = 1.0;
 	//m_ScrollPos = CPoint(0, 0);
