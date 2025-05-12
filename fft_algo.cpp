@@ -13,7 +13,12 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 	double f_end = F_END;
 	if (pDlgFrame->ptr_usb_data == NULL)
 	{
-		byte_count = read_hex_file("30_5.txt", &byte_array);
+		//byte_count = read_hex_file("30_5.txt", &byte_array); //load from file
+
+		//load from internal buffer
+		byte_count = sizeof(output30_5);
+		byte_array = (uint8_t*)calloc(byte_count, sizeof(uint8_t));
+		memcpy(byte_array, output30_5, byte_count);
 	}
 	else{
 		byte_count = pDlgFrame->usbbytescount;
