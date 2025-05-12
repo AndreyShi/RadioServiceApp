@@ -63,27 +63,43 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 	fftw_plan plan = fftw_plan_dft_1d(complex_count, signal, fft_result, FFTW_FORWARD, FFTW_ESTIMATE);
 	fftw_execute(plan);
 
-	// Вычисление амплитуды и перевод в dBm
-	double* fft_dBm = (double*)malloc(complex_count * sizeof(double));
+	// Вычисляем амплитуду и делаем fftshift
+	double* fftMag = (double*)malloc(complex_count * sizeof(double));
 	for (int i = 0; i < complex_count; i++) {
-		double mag = hypot(fft_result[i][0], fft_result[i][1]) / complex_count;
-		fft_dBm[i] = 10 * log10(mag / 1e-8); // Защита от log(0)
+		fftMag[i] = hypot(fft_result[i][0], fft_result[i][1]);
 	}
 
-	// Сдвигаем спектр (fftshift)
-	double* shifted_fft = (double*)malloc(complex_count * sizeof(double));
-	memcpy(shifted_fft, fft_dBm + complex_count / 2, complex_count / 2 * sizeof(double));
-	memcpy(shifted_fft + complex_count / 2, fft_dBm, complex_count / 2 * sizeof(double));
+	// Применяем fftshift к амплитудам
+	double* shiftedMag = (double*)malloc(complex_count * sizeof(double));
+	int half = complex_count / 2;
+	memcpy(shiftedMag, fftMag + half, half * sizeof(double));
+	memcpy(shiftedMag + half, fftMag, half * sizeof(double));
+
+	// Применяем оконную коррекцию (4/N) и обрезаем края (28 точек с каждой стороны)
+	int start = 28;
+	int end = complex_count - 28;
+	int N = end - start;
+	double scale = 4.0 / complex_count;
+
+	// Выделяем память для результатов
+	double* fft_dBm = (double*)malloc(N * sizeof(double));
+
+	// Вычисляем dBm с новыми параметрами (20*log10 вместо 10*log10 и 1e-6 вместо 1e-8)
+	for (int i = start; i < end; i++) {
+		double mag = scale * shiftedMag[i];
+		fft_dBm[i - start] = 20 * log10(mag / 1e-6);  // 20*log10(mag/1e-6) как в MATLAB
+	}
 
 
 	//FILE* out_file = fopen("fft_results.csv", "w");
 	//fprintf(out_file, "Frequency(MHz),Amplitude(dBm)\n");
-		for (size_t i = 0; i < complex_count; i++) {
-			double freq = f_start + (f_end - f_start) * i / complex_count;
+		for (size_t i = 0; i < N; i++) {
+			//double freq = f_start + (f_end - f_start) * i / complex_count;
+			double freq = f_start + (f_end - f_start) * i / (N - 1);
 			//fprintf(out_file, "%f,%f,\n", freq, shifted_fft[i]);
 			CRadioServiceAppDlg::FrequencyData data;
 			data.frequency = freq;
-			data.amplitude = shifted_fft[i];
+			data.amplitude = fft_dBm[i];
 			if (i < pDlgFrame->m_frequencyData.size())
 			{
 				pDlgFrame->m_frequencyData[i] = data;
@@ -102,7 +118,7 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 	fftw_free(signal);
 	fftw_free(fft_result);
 	free(fft_dBm);
-	free(shifted_fft);
+	free(shiftedMag);
 	free(byte_array);
 
 

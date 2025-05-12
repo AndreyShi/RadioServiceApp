@@ -17,9 +17,9 @@ imagParts = int16vals(2:2:end);
 complexSignal = complex(double(realParts), double(imagParts));
 
 % === FFT и перевод в dBm ===
-fftResult = fftshift(fft(complexSignal)/size(complexSignal,1));
-fftMag = abs(fftResult);
-fft_dBm = 10 * log10(fftMag/1e8);  % Добавим защиту от log(0)
+fftResult = fftshift(fft(complexSignal));
+fftMag = (4/size(complexSignal,1)) * abs(fftResult(28:end-28));
+fft_dBm = 20 * log10(fftMag/1e6);  % Добавим защиту от log(0)
 
 % === Частотная ось ===
 N = length(fft_dBm);
