@@ -4,6 +4,7 @@
 
 #pragma once
 #define ID_TIMER_USB_RECIEVE_TIMEOUT_EXPIRES 100
+#define ID_TIMER_INVALIDATION_INPUT_FREQ     101
 
 // CRadioServiceAppDlg dialog
 class CRadioServiceAppDlg : public CDialogEx
