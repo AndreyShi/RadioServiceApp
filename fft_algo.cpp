@@ -59,9 +59,14 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 	// Выделяем память для результата FFT
 	fftw_complex* fft_result = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)* complex_count);
 
-	// Создаем план FFT
-	fftw_plan plan = fftw_plan_dft_1d(complex_count, signal, fft_result, FFTW_FORWARD, FFTW_ESTIMATE);
-	fftw_execute(plan);
+	//size_t cnt_chanks = complex_count / 256;
+	//for (int i = 0; i < cnt_chanks; i++){
+		// Создаем план FFT
+		fftw_plan plan = fftw_plan_dft_1d(complex_count, signal, fft_result, FFTW_FORWARD, FFTW_ESTIMATE);
+		//fftw_plan plan = fftw_plan_dft_1d(256, &signal[i * 256], &fft_result[i * 256], FFTW_FORWARD, FFTW_ESTIMATE);
+		fftw_execute(plan);
+		fftw_destroy_plan(plan);
+	//}
 
 	// Вычисляем амплитуду и делаем fftshift
 	double* fftMag = (double*)malloc(complex_count * sizeof(double));
@@ -114,7 +119,7 @@ int calculate_fft(CRadioServiceAppDlg* pDlgFrame){
 	//printf("Processing complete. Results saved in fft_results.csv\n");
 
 	// Освобождаем память
-	fftw_destroy_plan(plan);
+	//fftw_destroy_plan(plan);
 	fftw_free(signal);
 	fftw_free(fft_result);
 	free(fft_dBm);
