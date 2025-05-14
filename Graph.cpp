@@ -230,8 +230,8 @@ void GraphHandler_fft_zoom_mouse(CRadioServiceAppDlg* pDlgFrame)
 	// Подписи осей
 	memDC.SetBkMode(TRANSPARENT);
 	memDC.SetTextColor(RGB(0, 0, 0));
-	memDC.TextOutW(graphRect.left - 35, graphRect.top - 30, L"Амплитуда dBm");
-	memDC.TextOutW(graphRect.right - 55, graphRect.bottom + 20, L"Частота (МГц)");
+	memDC.TextOutW(graphRect.left - 35, graphRect.top - 30, L"Amplitude (dBm)");
+	memDC.TextOutW(graphRect.right - 55, graphRect.bottom + 20, L"Freq (Mhz)");
 
 	// 3. Копируем буфер на экран
 	pDC.BitBlt(0, 0, clientRect.Width(), clientRect.Height(),
