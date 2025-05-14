@@ -332,7 +332,7 @@ UINT XferLoop(LPVOID params) {
 		//dlg->m_frequencyData.clear();// очистка буфера
 
 		printf("calculate fft start %s\n", dlg->get_cur_time().st);
-		calculate_fft(dlg);          // рассчет и запись в буфер
+		calculate_fft_new(dlg);          // рассчет и запись в буфер
 		printf("calculate fft finish %s\n", dlg->get_cur_time().st);
 		dlg->data_is_processing = 0;
 		printf("updating graph\n", dlg->get_cur_time().st);
