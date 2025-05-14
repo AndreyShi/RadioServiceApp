@@ -9,7 +9,8 @@ void GraphHandler_fft_zoom_mouse(CRadioServiceAppDlg* pDlgFrame)
 
 	if (pDlgFrame->m_frequencyData.empty()) {
 		printf("m_frequencyData is empty, load 30_5.txt data\n");
-		calculate_fft(pDlgFrame);
+		//calculate_fft(pDlgFrame);
+		calculate_fft_new(pDlgFrame);
 		//for (int i = 0; i < 512; i += 2) {
 		//	CRadioServiceAppDlg::FrequencyData data;
 		//	data.frequency = fft30_5[i];
