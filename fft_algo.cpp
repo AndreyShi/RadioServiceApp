@@ -212,20 +212,10 @@ int calculate_fft_new(CRadioServiceAppDlg* pDlgFrame){
 
 		// Выделяем память для результатов
 		double* fft_dBm = (double*)malloc(N * sizeof(double));
-		double max_val = -INFINITY;
-		// Вычисляем dBm с новыми параметрами (20*log10 вместо 10*log10 и 1e-6 вместо 1e-8)
+		// Вычисляем dBm с новыми параметрами (20*log10 вместо 10*log10 и 1e6 вместо 1e8)
 		for (int j = start; j < end; j++) {
 			double mag = scale * shiftedMag[j];
-			fft_dBm[j - start] = 20 * log10(mag / 1e-6);  // 20*log10(mag/1e-6) как в MATLAB
-			if (fft_dBm[j - start] > max_val)
-			    {max_val = fft_dBm[j - start];}
-		}
-
-		//% == = Нормировка: максимум = -54 dBm == =
-		//	fft_dBm = fft_dBm - max(fft_dBm) - 54;
-		// Нормировка
-		for (size_t j = 0; j < N; j++) {
-			fft_dBm[j] = fft_dBm[j] - max_val + TARGET_PEAK;
+			fft_dBm[j - start] = 20 * log10(mag / 1e6);  // 20*log10(mag/1e6) как в MATLAB
 		}
 		//FILE* out_file = fopen("fft_results.csv", "w");
 		//fprintf(out_file, "Frequency(MHz),Amplitude(dBm)\n");
