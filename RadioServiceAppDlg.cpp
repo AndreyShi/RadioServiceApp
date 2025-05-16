@@ -55,6 +55,7 @@ CRadioServiceAppDlg::CRadioServiceAppDlg(CWnd* pParent /*=NULL*/)
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	ptr_usb_data = NULL;
 	data_is_processing = 0;
+	file_write = false;
 }
 /*
 0 dB - 3F
@@ -401,6 +402,7 @@ BOOL CRadioServiceAppDlg::OnInitDialog()
 		{
 			pSysMenu->AppendMenu(MF_SEPARATOR);
 			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
+			pSysMenu->AppendMenu(MF_STRING, IDM_TOGGLE_FILE_WRITE, _T("вкл. запись файла"));
 		}
 	}
 
@@ -456,6 +458,20 @@ void CRadioServiceAppDlg::OnSysCommand(UINT nID, LPARAM lParam)
 	{
 		CAboutDlg dlgAbout;
 		dlgAbout.DoModal();
+	}
+	else if (nID == IDM_TOGGLE_FILE_WRITE){
+		CMenu* pSysMenu = GetSystemMenu(FALSE);
+		if (pSysMenu)
+		   { 
+				if (file_write == false){
+					file_write = true;
+					pSysMenu->ModifyMenu(IDM_TOGGLE_FILE_WRITE, MF_BYCOMMAND, IDM_TOGGLE_FILE_WRITE, _T("выкл. запись файла"));
+				}
+				else{
+					file_write = false;
+					pSysMenu->ModifyMenu(IDM_TOGGLE_FILE_WRITE, MF_BYCOMMAND, IDM_TOGGLE_FILE_WRITE, _T("вкл. запись файла"));
+				}
+		   }
 	}
 	else
 	{

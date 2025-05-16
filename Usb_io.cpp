@@ -325,9 +325,11 @@ UINT XferLoop(LPVOID params) {
 #endif		
 		printf("end XferLoop ,bytes recv %d %s\n", dlg->usbbytescount, dlg->get_cur_time().st);
 
-		printf("save bin data to output.txt start %s\n", dlg->get_cur_time().st);
-		dlg->save_hex_buffer_to_file(dlg->ptr_usb_data, dlg->usbbytescount, "output.txt");
-		printf("save bin data finish %s\n", dlg->get_cur_time().st);
+		if (dlg->file_write == true){
+			printf("save bin data to output.txt start %s\n", dlg->get_cur_time().st);
+			dlg->save_hex_buffer_to_file(dlg->ptr_usb_data, dlg->usbbytescount, "output.txt");
+			printf("save bin data finish %s\n", dlg->get_cur_time().st);
+		}
 		dlg->data_is_processing = 1;
 		//dlg->m_frequencyData.clear();// очистка буфера
 

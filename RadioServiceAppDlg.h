@@ -52,6 +52,7 @@ public:
 	};
 	std::vector<FrequencyData> m_frequencyData;
 	std::vector<FrequencyData> m_frequencyData_display;
+	bool file_write;
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
