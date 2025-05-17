@@ -16,7 +16,9 @@
 // turns off MFC's hiding of some common and often safely ignored warning messages
 #define _AFX_ALL_WARNINGS
 //#define DEBUG_WITH_FILE
-
+#define _2MHz        2
+#define _30MHz      30  //min start freq
+#define _3000MHz  3000  //max end freq
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
 

@@ -181,7 +181,7 @@ int calculate_fft_new(CRadioServiceAppDlg* pDlgFrame){
 	// Выделяем память для результата FFT
 	fftw_complex* fft_result = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)* complex_count);
 #define chunk 256
-#define _2MHz  2
+
 	size_t cnt_chanks = complex_count / chunk;
 	for (int i = 0; i < cnt_chanks; i++){
 		//определяем начальную/конечную частоту

@@ -3,8 +3,9 @@
 //
 
 #pragma once
-#define ID_TIMER_USB_RECIEVE_TIMEOUT_EXPIRES 100
-#define ID_TIMER_INVALIDATION_INPUT_FREQ     101
+#define ID_TIMER_USB_RECIEVE_TIMEOUT_EXPIRES     100
+#define ID_TIMER_INVALIDATION_INPUT_FREQ_START   101
+#define ID_TIMER_INVALIDATION_INPUT_FREQ_END     102
 
 // CRadioServiceAppDlg dialog
 class CRadioServiceAppDlg : public CDialogEx
@@ -53,6 +54,11 @@ public:
 	std::vector<FrequencyData> m_frequencyData;
 	std::vector<FrequencyData> m_frequencyData_display;
 	bool file_write;
+	bool check_startfreq_endfreq();
+	int get_startfreq();
+	int get_endfreq();
+	void set_startfreq(int freq);
+	void set_endfreq(int freq);
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 

@@ -73,10 +73,10 @@ CRadioServiceAppDlg::device_data CRadioServiceAppDlg::getting_data(){
 	int cur_sel_atten;
 	BOOL lpTrans = FALSE;
 
-	dt.start_freq = GetDlgItemInt(IDC_START_FREQ, &lpTrans, FALSE);
+	dt.start_freq = (UINT16)get_startfreq();
 	printf("start_freq: %d ", dt.start_freq);
 
-	dt.end_freq = GetDlgItemInt(IDC_END_FREQ, &lpTrans, FALSE);
+	dt.end_freq = (UINT16)get_endfreq();
 	printf("end_freq: %d ", dt.end_freq);
 
 	cur_sel_atten = GetDlgItemInt(IDC_COMBO_ATTENU, &lpTrans, FALSE);
@@ -196,26 +196,30 @@ END_MESSAGE_MAP()
 
 
 void CRadioServiceAppDlg::OnEnChangeEditStartFreq() {
-	CString strValue;
-	GetDlgItem(IDC_START_FREQ)->GetWindowText(strValue);
-
-	int freq = _ttoi(strValue);
+	int start_freq = get_startfreq();
+	int end_freq = get_endfreq();
 	//printf("freq %d\n", freq);
-	if (freq < 30) {
-		SetTimer(ID_TIMER_INVALIDATION_INPUT_FREQ, 1000, NULL);
-	}	
+	if (start_freq < _30MHz) {
+		SetTimer(ID_TIMER_INVALIDATION_INPUT_FREQ_START, 1000, NULL);
+	}
+	else if (end_freq - start_freq < _2MHz){
+		SetTimer(ID_TIMER_INVALIDATION_INPUT_FREQ_START, 1000, NULL);
+	}
 }
 
 
 void CRadioServiceAppDlg::OnEnChangeEditEndFreq() {
-	CString strValue;
-	GetDlgItem(IDC_END_FREQ)->GetWindowText(strValue);
+	int start_freq = get_startfreq();
+	int end_freq = get_endfreq();
 
-	int freq = _ttoi(strValue);
 	//printf("freq %d\n", freq);
-	if (freq > 3000) {
-		GetDlgItem(IDC_END_FREQ)->SetWindowText(_T("3000"));
+	if (end_freq > _3000MHz) {
+		set_endfreq(_3000MHz);
 		printf("end freq > 3000\n");
+	}
+	//конечная частота меньше чем начальная частота + 2
+	else if (end_freq - start_freq < _2MHz){
+		SetTimer(ID_TIMER_INVALIDATION_INPUT_FREQ_END, 1000, NULL);
 	}
 
 }
@@ -333,15 +337,28 @@ void CRadioServiceAppDlg::OnTimer(UINT_PTR nIdEvent){
 			usb_timeout = FALSE;
 		}
 	}
-	else if (nIdEvent == ID_TIMER_INVALIDATION_INPUT_FREQ){
-		CString strValue;
-		GetDlgItem(IDC_START_FREQ)->GetWindowText(strValue);
+	else if (nIdEvent == ID_TIMER_INVALIDATION_INPUT_FREQ_START){
+		int start_freq = get_startfreq();
+		int end_freq = get_endfreq();
 
-		int freq = _ttoi(strValue);
 		//printf("freq %d\n", freq);
-		if (freq < 30) {
-			GetDlgItem(IDC_START_FREQ)->SetWindowText(_T("30"));
+		if (start_freq < _30MHz) {
+			set_startfreq(_30MHz);
 			printf("start freq < 30\n");
+		}
+		else if (end_freq - start_freq < _2MHz){
+			set_startfreq(end_freq - _2MHz);
+			printf("end_freq - start_freq < 2 \n");
+		}
+	}
+	//конечная частота меньше чем начальная частота + 2
+	else if (nIdEvent == ID_TIMER_INVALIDATION_INPUT_FREQ_END){
+		int start_freq = get_startfreq();
+		int end_freq = get_endfreq();
+
+		if (end_freq - start_freq < _2MHz){
+			set_endfreq(start_freq + _2MHz);
+			printf("end_freq - start_freq < 2 \n");
 		}
 	}
 	else{
@@ -419,8 +436,9 @@ BOOL CRadioServiceAppDlg::OnInitDialog()
 	GetDlgItem(IDC_INIT)->ShowWindow(FALSE);
 	CreateConsole();
 	InitUsb();
-	GetDlgItem(IDC_START_FREQ)->SetWindowTextW(_T("30"));
+	//init first endfreq, becouse we get error validation input if startfreq first
 	GetDlgItem(IDC_END_FREQ)->SetWindowTextW(_T("32"));
+	GetDlgItem(IDC_START_FREQ)->SetWindowTextW(_T("30"));
 	((CComboBox*)GetDlgItem(IDC_COMBO_ATTENU))->SelectString(0,_T("0 dB"));
 	XferThread = NULL;
 
@@ -541,6 +559,54 @@ void CRadioServiceAppDlg::OnBnClickedInitialization(){
 	SetupUsbOUT_init();
 }
 
+bool CRadioServiceAppDlg::check_startfreq_endfreq(){
+
+	int start_freq = get_startfreq();
+	int end_freq = get_endfreq();
+
+	if (start_freq < _30MHz){
+		return true;
+	}
+	else if (end_freq > _3000MHz){
+		return true;
+	}
+	else if (end_freq - start_freq < _2MHz){
+		return true;
+	}
+
+	return false;
+}
+
+int CRadioServiceAppDlg::get_startfreq(){
+	CString strValue;
+	int start_freq;
+
+	GetDlgItem(IDC_START_FREQ)->GetWindowText(strValue);
+	start_freq = _ttoi(strValue);
+	return start_freq;
+}
+
+int CRadioServiceAppDlg::get_endfreq(){
+	CString strValue;
+	int end_freq;
+
+	GetDlgItem(IDC_END_FREQ)->GetWindowText(strValue);
+	end_freq = _ttoi(strValue);
+	return end_freq;
+}
+
+void CRadioServiceAppDlg::set_startfreq(int freq){
+	CString strValue;
+	strValue.Format(_T("%d"), freq);
+	GetDlgItem(IDC_START_FREQ)->SetWindowText(strValue);
+}
+
+void CRadioServiceAppDlg::set_endfreq(int freq){
+	CString strValue;
+	strValue.Format(_T("%d"), freq);
+	GetDlgItem(IDC_END_FREQ)->SetWindowText(strValue);
+}
+
 void CRadioServiceAppDlg::OnBnClickedPusk(){
 	//fft30_5[157]
 	//m_frequencyData[78].amplitude = m_frequencyData[78].amplitude + 5.0F;
@@ -592,6 +658,10 @@ void CRadioServiceAppDlg::OnBnClickedPusk(){
 		GetDlgItem(IDC_PUSK)->SetWindowTextW(_T("старт"));
 		return;
 	}
+
+	if (check_startfreq_endfreq() == true)
+	    {return;}
+
 	SetupUsbOUT_init();
 	dt = getting_data();
 	bLooping = true;
