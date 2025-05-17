@@ -180,9 +180,15 @@ int calculate_fft_new(CRadioServiceAppDlg* pDlgFrame){
 
 	// Выделяем память для результата FFT
 	fftw_complex* fft_result = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)* complex_count);
-#define chunk 256
+#define chunk        256
 
 	size_t cnt_chanks = complex_count / chunk;
+	//обрезаем края (28 точек с каждой стороны)
+	int start = 28;
+	int end = chunk - 28;
+	int chunk_cutted = end - start; //200 chunk_cutted	
+	pDlgFrame->m_frequencyData.resize(cnt_chanks * chunk_cutted);
+
 	for (int i = 0; i < cnt_chanks; i++){
 		//определяем начальную/конечную частоту
 		double f_start_chunk = f_start + i * _2MHz;
@@ -204,14 +210,9 @@ int calculate_fft_new(CRadioServiceAppDlg* pDlgFrame){
 		memcpy(shiftedMag, fftMag + half, half * sizeof(double));
 		memcpy(shiftedMag + half, fftMag, half * sizeof(double));
 
-		// Применяем оконную коррекцию (4/N) и обрезаем края (28 точек с каждой стороны)
-		int start = 28;
-		int end = chunk - 28;
-		int N = end - start;
 		double scale = 4.0 / chunk;
-
 		// Выделяем память для результатов
-		double* fft_dBm = (double*)malloc(N * sizeof(double));
+		double* fft_dBm = (double*)malloc(chunk_cutted * sizeof(double));
 		// Вычисляем dBm с новыми параметрами (20*log10 вместо 10*log10 и 1e6 вместо 1e8)
 		for (int j = start; j < end; j++) {
 			double mag = scale * shiftedMag[j];
@@ -219,15 +220,15 @@ int calculate_fft_new(CRadioServiceAppDlg* pDlgFrame){
 		}
 		//FILE* out_file = fopen("fft_results.csv", "w");
 		//fprintf(out_file, "Frequency(MHz),Amplitude(dBm)\n");
-		for (size_t j = 0; j < N; j++) {
+		for (size_t j = 0; j < chunk_cutted; j++) {
 			//double freq = f_start + (f_end - f_start) * i / complex_count;
-			double freq = f_start_chunk + (f_end_chunk - f_start_chunk) * j / (N - 1);
+			double freq = f_start_chunk + (f_end_chunk - f_start_chunk) * j / (chunk_cutted - 1);
 			//fprintf(out_file, "%f,%f,\n", freq, shifted_fft[i]);
 			CRadioServiceAppDlg::FrequencyData data;
 			data.frequency = freq;
 			data.amplitude = fft_dBm[j];
-			if (j + i * 200 < pDlgFrame->m_frequencyData.size())
-			    { pDlgFrame->m_frequencyData[j + i * 200] = data;}
+			if (j + i * chunk_cutted < pDlgFrame->m_frequencyData.size())
+			    { pDlgFrame->m_frequencyData[j + i * chunk_cutted] = data;}
 			else
 			    { pDlgFrame->m_frequencyData.push_back(data);}
 		}
