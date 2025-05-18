@@ -180,7 +180,7 @@ int calculate_fft_new(CRadioServiceAppDlg* pDlgFrame){
 
 	// Выделяем память для результата FFT
 	fftw_complex* fft_result = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)* complex_count);
-#define chunk        256
+#define chunk        256 //1024/2(16bit LE)/2(real part + image part) = 256 complex numbers
 
 	size_t cnt_chanks = complex_count / chunk;
 	//обрезаем края (28 точек с каждой стороны)
