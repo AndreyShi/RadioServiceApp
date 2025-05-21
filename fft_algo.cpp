@@ -190,7 +190,7 @@ int calculate_fft_new(CRadioServiceAppDlg* pDlgFrame){
 	pDlgFrame->m_frequencyData.resize(cnt_chanks * chunk_cutted);
 	FILE* out_file = fopen("fft_results.csv", "w");
 	if (out_file != NULL)
-	    {fprintf(out_file, "Frequency(MHz),Amplitude(dBm)\n");}
+	    {fprintf(out_file, "Frequency(MHz),real part,image part\n");}
 
 	for (int i = 0; i < cnt_chanks; i++){
 		//определяем начальную/конечную частоту
@@ -201,31 +201,33 @@ int calculate_fft_new(CRadioServiceAppDlg* pDlgFrame){
 		fftw_plan plan = fftw_plan_dft_1d(chunk, &signal[i * chunk], &fft_result[i * chunk], FFTW_FORWARD, FFTW_ESTIMATE);
 		fftw_execute(plan);
 
-		// Вычисляем амплитуду и делаем fftshift
+        //fftshift
+		fftw_complex* fft_result_shifted = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)* chunk);
+		int half = chunk / 2;
+		memcpy(fft_result_shifted, &fft_result[i * chunk] + half, half * sizeof(fftw_complex));
+		memcpy(fft_result_shifted + half, &fft_result[i * chunk], half * sizeof(fftw_complex));
+
+		//вычисление абсолютного значения
 		double* fftMag = (double*)malloc(chunk * sizeof(double));
 		for (int j = 0; j < chunk; j++) {
-			fftMag[j] = hypot(fft_result[j + i * chunk][0], fft_result[j + i * chunk][1]);
+			fftMag[j] = hypot(fft_result_shifted[j][0], fft_result_shifted[j][1]);
 		}
 
-		// Применяем fftshift к амплитудам
-		double* shiftedMag = (double*)malloc(chunk * sizeof(double));
-		int half = chunk / 2;
-		memcpy(shiftedMag, fftMag + half, half * sizeof(double));
-		memcpy(shiftedMag + half, fftMag, half * sizeof(double));
-
+		//нормировка
 		double scale = 4.0 / chunk;
-		// Выделяем память для результатов
 		double* fft_dBm = (double*)malloc(chunk_cutted * sizeof(double));
 		// Вычисляем dBm с новыми параметрами (20*log10 вместо 10*log10 и 1e6 вместо 1e8)
 		for (int j = start; j < end; j++) {
-			double mag = scale * shiftedMag[j];
+			double mag = scale * fftMag[j];
 			fft_dBm[j - start] = 20 * log10(mag / 1e6);  // 20*log10(mag/1e6) как в MATLAB
 		}
 
 		for (size_t j = 0; j < chunk_cutted; j++) {
 			double freq = f_start_chunk + (f_end_chunk - f_start_chunk) * j / (chunk_cutted - 1);
 			if (out_file != NULL)
-			    {fprintf(out_file, "%f,%f,\n", freq, fft_dBm[j]);}
+			{
+				fprintf(out_file, "%f,%f,%f,\n", freq, fft_result_shifted[start + j][0], fft_result_shifted[j][1]);
+			}
 			CRadioServiceAppDlg::FrequencyData data;
 			data.frequency = freq;
 			data.amplitude = fft_dBm[j];
@@ -239,7 +241,8 @@ int calculate_fft_new(CRadioServiceAppDlg* pDlgFrame){
 		// Освобождаем память
 		fftw_destroy_plan(plan);
 		free(fft_dBm);
-		free(shiftedMag);
+		fftw_free(fft_result_shifted);
+		//free(shiftedMag);
 		free(fftMag);
 	}
 	if (out_file != NULL)
